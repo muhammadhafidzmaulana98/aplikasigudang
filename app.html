@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Input Barang Datang</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 12px;
+            padding-bottom: 80px;
+        }
+
+        /* STYLES HALAMAN LOGIN MODAL */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(255,255,255,0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(255,255,255,0.06) 0%, transparent 40%),
+                linear-gradient(135deg, #0f172a 0%, #1e3a8a 45%, #1d4ed8 100%);
+            background-size: 200% 200%;
+            animation: gradientGeser 12s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 16px;
+        }
+
+        @keyframes gradientGeser {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .login-card {
+            background: var(--surface);
+            width: 100%;
+            max-width: 400px;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            animation: munculHalus 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes munculHalus {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .login-card h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .login-card p {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        /* MAIN APP CONTAINER */
+        .app-container {
+            display: none; /* Tersembunyi sebelum login */
+            animation: munculHalus 0.4s ease;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-tab {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: #64748b;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.tab-aktif {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: box-shadow 0.2s ease;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .baris-muncul {
+            animation: barisMasuk 0.25s ease;
+        }
+
+        @keyframes barisMasuk {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes putarLoading {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #475569;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qty-btn {
+            width: 44px;
+            height: 44px;
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .qty-btn:active {
+            background: #e2e8f0;
+        }
+
+        .qty-input {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:active {
+            background: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            width: auto;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+
+        .btn-danger:active {
+            transform: scale(0.94);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        /* Container sel dengan checkbox */
+        .cell-check {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .cell-check input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary);
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        .cell-check span {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-print {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-clear {
+            background: #64748b;
+            color: white;
+        }
+
+        .print-header {
+            display: none;
+        }
+
+        /* CSS UNTUK PRINT / CETAK */
+        @media print {
+            body {
+                background: white;
+                color: black;
+                padding: 0;
+            }
+
+            .no-print, .login-overlay {
+                display: none !important;
+            }
+
+            /* Sembunyikan Checkbox saat di-print */
+            input[type="checkbox"] {
+                display: none !important;
+            }
+
+            .cell-check {
+                background: transparent;
+                padding: 0;
+            }
+
+            .card {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
+            .print-header h2 {
+                font-size: 18px;
+                margin-bottom: 4px;
+            }
+
+            .print-header p {
+                font-size: 13px;
+                margin: 2px 0;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                border: 1px solid #000;
+                padding: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- OVERLAY PENUH LAYAR SAAT MENYIMPAN KE SERVER -->
+    <div id="loading_overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center;">
+        <div style="width: 48px; height: 48px; border: 5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: putarLoading 0.8s linear infinite;"></div>
+        <p style="color: white; font-size: 15px; font-weight: 600; margin-top: 16px;">Menyimpan ke server...</p>
+        <p style="color: rgba(255,255,255,0.75); font-size: 12px; margin-top: 4px;">Mohon tunggu, jangan tekan tombol apapun</p>
+    </div>
+
+    <!-- MODAL LOGIN AWAL -->
+    <div id="login_modal" class="login-overlay">
+        <div class="login-card">
+            <h2>Masuk Sistem Gudang</h2>
+            <p>Pilih cabang dan masukkan password untuk mengakses aplikasi</p>
+
+            <div class="form-group">
+                <label for="select_cabang">Cabang / Kota</label>
+                <select id="select_cabang">
+                    <option value="">-- Pilih Cabang --</option>
+                    <option value="Jakarta">Jakarta</option>
+                    <option value="Jogja">Jogja</option>
+                    <option value="Serpong">Serpong</option>
+                    <option value="Solo">Solo</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="input_password">Password Cabang</label>
+                <div style="position: relative;">
+                    <input type="password" id="input_password" placeholder="Masukkan password..." autocomplete="off" style="width: 100%; padding-right: 44px; box-sizing: border-box;">
+                    <button type="button" onclick="toggleLihatPassword()" id="btn_toggle_pw" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; color: #64748b;">
+                        <svg id="icon_mata_terbuka" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none"></circle>
+                        </svg>
+                        <svg id="icon_mata_tertutup" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 12s4 6 10 6 10-6 10-6"></path>
+                            <line x1="5" y1="15" x2="3" y2="18"></line>
+                            <line x1="9" y1="17.3" x2="8.2" y2="20"></line>
+                            <line x1="15" y1="17.3" x2="15.8" y2="20"></line>
+                            <line x1="19" y1="15" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="login_error" style="color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none;">
+                Cabang atau password salah!
+            </div>
+
+            <button class="btn btn-primary" id="btn_login" onclick="prosesLogin()">Masuk</button>
+        </div>
+    </div>
+
+    <!-- UTAMA APLIKASI -->
+    <div id="app_container" class="app-container">
+        
+        <div class="header no-print" style="position: relative;">
+            <button onclick="logout()" style="position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer;">← Keluar</button>
+            <h2>Input Barang Datang</h2>
+            <p style="font-size: 12px; opacity: 0.9;" id="label_kota_aktif">Cabang: -</p>
+        </div>
+
+        <div id="peringatan_auto_login" class="no-print" style="display: none; background: #fef3c7; color: #92400e; padding: 10px 16px; font-size: 13px; text-align: center; border-bottom: 1px solid #fde68a;">
+            ⚠️ Kamu otomatis masuk lagi sebagai cabang sebelumnya. Kalau ini bukan HP/sesi kamu, klik "Keluar" di pojok kiri atas.
+        </div>
+
+        <div class="menu-tab no-print">
+            <button id="tab_masuk" class="tab-btn tab-aktif" onclick="gantiMode('masuk')">📦 Barang Masuk</button>
+            <button id="tab_opname" class="tab-btn" onclick="gantiMode('opname')">📋 Stock Opname</button>
+        </div>
+
+        <div class="card no-print">
+            <!-- Hitungan Ke- (khusus Stock Opname) -->
+            <div class="form-group" id="grup_hitungan_ke" style="display: none;">
+                <label for="hitungan_ke">Hitungan Ke-</label>
+                <select id="hitungan_ke">
+                    <option value="">-- Pilih Hitungan --</option>
+                    <option value="Hitungan 1">Hitungan 1</option>
+                    <option value="Hitungan 2">Hitungan 2</option>
+                    <option value="Hitungan 3">Hitungan 3</option>
+                    <option value="Final">Final</option>
+                </select>
+            </div>
+
+            <!-- Merk / Kategori Barang (khusus Stock Opname) -->
+            <div class="form-group" id="grup_merk_opname" style="display: none;">
+                <label for="merk_opname">Merk / Kategori Barang</label>
+                <select id="merk_opname">
+                    <option value="">-- Pilih Merk --</option>
+                    <option value="Dura">Dura</option>
+                    <option value="Daytona">Daytona</option>
+                    <option value="Osram">Osram</option>
+                </select>
+            </div>
+
+            <!-- Input Gudang/Penginput -->
+            <div class="form-group">
+                <label for="nama_gudang">Nama Penginput / Gudang</label>
+                <input type="text" id="nama_gudang" list="daftar_gudang" placeholder="Masukan Nama Penginput.." autocomplete="off">
+                <datalist id="daftar_gudang"></datalist>
+            </div>
+
+            <!-- Input Kolian (cuma relevan buat Barang Masuk) -->
+            <div class="form-group" id="grup_kolian">
+                <label for="jumlah_kolian">Jumlah Kolian (Global)</label>
+                <input type="number" id="jumlah_kolian" placeholder="Masukkan jumlah kolian (misal: 50)..." min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="kode_barang">Kode Barang</label>
+                <input type="text" id="kode_barang" placeholder="Ketik Kode (misal: 5292)...">
+            </div>
+
+            <div class="form-group">
+                <label>Jumlah (Qty Datang)</label>
+                <div class="qty-control">
+                    <div class="qty-btn" onclick="adjustQty(-1)">-</div>
+                    <input type="number" id="qty" class="qty-input" value="" min="1" placeholder="0">
+                    <div class="qty-btn" onclick="adjustQty(1)">+</div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="tambahBarang()">+ Tambahkan ke Daftar</button>
+        </div>
+
+        <!-- Print Header -->
+        <div class="print-header">
+            <h2>LAPORAN BARANG DATANG</h2>
+            <p id="print-date"></p>
+            <p id="print-kolian" style="font-weight: bold;"></p>
+            <p id="print-gudang" style="font-weight: bold;"></p>
+            <hr style="margin: 10px 0; border: 0.5px solid #000;">
+        </div>
+
+        <!-- Tabel Barang Masuk (Inputan Sekarang) -->
+        <div class="card">
+            <h3 id="judul_daftar" style="margin-bottom: 12px; font-size: 16px;">Daftar Barang Masuk</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th style="text-align: center;">Qty</th>
+                            <th class="no-print" style="text-align: center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabel_body">
+                        <!-- Transaksi disisipkan via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="action-buttons no-print">
+                <button class="btn btn-primary" onclick="kirimKeServer(this)">Simpan ke Server</button>
+                <button class="btn btn-print" onclick="cetakStruk()">Cetak / Print</button>
+                <button class="btn btn-clear" onclick="hapusSemua()">Reset</button>
+            </div>
+        </div>
+
+        <!-- Tabel Rekap Gabungan Per-Cell Checkbox -->
+        <div class="card no-print">
+            <h3 id="judul_rekap" style="margin-bottom: 12px; font-size: 16px;">Rekap Gabungan Per-Penginput (Barang Masuk)</h3>
+
+            <div class="form-group">
+                <label for="filter_dari">Dari Tanggal (kosongkan = dari awal)</label>
+                <input type="date" id="filter_dari">
+            </div>
+            <div class="form-group">
+                <label for="filter_sampai">Sampai Tanggal (kosongkan = sampai sekarang)</label>
+                <input type="date" id="filter_sampai">
+            </div>
+
+            <div class="form-group" id="grup_filter_hitungan" style="display: none;">
+                <label for="filter_hitungan">Filter Hitungan Ke- (khusus lihat 1 hitungan)</label>
+                <select id="filter_hitungan" onchange="toggleModeSelisih()">
+                    <option value="">-- Semua Hitungan --</option>
+                    <option value="Hitungan 1">Hitungan 1</option>
+                    <option value="Hitungan 2">Hitungan 2</option>
+                    <option value="Hitungan 3">Hitungan 3</option>
+                    <option value="Final">Final</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="grup_filter_merk" style="display: none;">
+                <label for="filter_merk">Filter Merk (khusus lihat 1 merk, biar Dura/Daytona/Osram gak nyampur)</label>
+                <select id="filter_merk">
+                    <option value="">-- Semua Merk --</option>
+                    <option value="Dura">Dura</option>
+                    <option value="Daytona">Daytona</option>
+                    <option value="Osram">Osram</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="grup_cari_selisih" style="display: none;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="cari_selisih" onchange="toggleModeSelisih()" style="width: 18px; height: 18px;">
+                    <span>🔍 Cari Selisih Antar Hitungan (bandingkan Hitungan 1/2/3/Final berdampingan)</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="mode_edit" onchange="toggleModeSelisih()" style="width: 18px; height: 18px;">
+                    <span>📝 Mode Edit (tampilkan per transaksi, bisa edit/hapus langsung tanpa buka spreadsheet)</span>
+                </label>
+            </div>
+
+            <button class="btn btn-primary" onclick="muatRekap()" style="margin-bottom: 12px;">Muat / Refresh Rekap</button>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr id="rekap_header">
+                            <th>Kode</th>
+                            <th style="text-align: center;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rekap_body">
+                        <tr><td colspan="2" style="text-align:center; color:#64748b;">Tekan "Muat / Refresh Rekap" untuk lihat data gabungan</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Gantilah dengan URL Web App dari Apps Script kamu
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwVoEYHhRoUIwowvuLpQrDj7i1M48QkwcRZX5erN9SkofVeki9wN23HgWvGHf3ouAd7/exec";
+
+        // PASSWORD PER CABANG
+        const PASWORD_CABANG = {
+            "Jakarta": "BSAJ168",
+            "Jogja": "BSMJ169",
+            "Solo": "BSMS168",
+            "Serpong": "BSAS169"
+        };
+
+        let KOTA_AKTIF = "";
+        let MODE_AKTIF = "masuk"; // "masuk" atau "opname"
+        let DAFTAR_MASUK = [];
+        let DAFTAR_OPNAME = [];
+        let DAFTAR_BARANG = DAFTAR_MASUK; // referensi array yang lagi aktif
+
+        function gantiMode(mode) {
+            if (mode === MODE_AKTIF) return;
+
+            // Simpan balik array yang lagi aktif sebelum pindah tab
+            if (MODE_AKTIF === "masuk") {
+                DAFTAR_MASUK = DAFTAR_BARANG;
+            } else {
+                DAFTAR_OPNAME = DAFTAR_BARANG;
+            }
+
+            MODE_AKTIF = mode;
+            DAFTAR_BARANG = (mode === "masuk") ? DAFTAR_MASUK : DAFTAR_OPNAME;
+
+            document.getElementById('tab_masuk').classList.toggle('tab-aktif', mode === 'masuk');
+            document.getElementById('tab_opname').classList.toggle('tab-aktif', mode === 'opname');
+
+            document.getElementById('judul_daftar').innerText =
+                (mode === 'masuk') ? 'Daftar Barang Masuk' : 'Daftar Stock Opname';
+            document.getElementById('judul_rekap').innerText =
+                (mode === 'masuk') ? 'Rekap Gabungan Per-Penginput (Barang Masuk)' : 'Rekap Gabungan Per-Penginput (Stock Opname)';
+
+            document.getElementById('grup_hitungan_ke').style.display = (mode === 'opname') ? 'block' : 'none';
+            document.getElementById('grup_merk_opname').style.display = (mode === 'opname') ? 'block' : 'none';
+            document.getElementById('grup_filter_hitungan').style.display = (mode === 'opname') ? 'block' : 'none';
+            document.getElementById('grup_filter_merk').style.display = (mode === 'opname') ? 'block' : 'none';
+            document.getElementById('grup_cari_selisih').style.display = (mode === 'opname') ? 'block' : 'none';
+            document.getElementById('grup_kolian').style.display = (mode === 'opname') ? 'none' : 'block';
+
+            renderTabel();
+            muatDariLocalStorage();
+
+            // Kosongkan tampilan rekap lama biar gak salah baca pas ganti tab
+            document.getElementById('rekap_header').innerHTML = '';
+            document.getElementById('rekap_body').innerHTML = '<tr><td colspan="2" style="text-align:center; color:#64748b;">Tekan "Muat / Refresh Rekap" untuk lihat data gabungan</td></tr>';
+        }
+
+        function toggleModeSelisih() {
+            const cariSelisih = document.getElementById('cari_selisih').checked;
+            const modeEdit = document.getElementById('mode_edit').checked;
+            const filterHitungan = document.getElementById('filter_hitungan');
+            const cekSelisihEl = document.getElementById('cari_selisih');
+            const cekEditEl = document.getElementById('mode_edit');
+
+            // Mode Edit dan Cari Selisih itu 2 tampilan yang beda, gak bisa bareng.
+            // Kalau salah satu dicentang, yang lain otomatis dimatiin.
+            if (modeEdit && cariSelisih) {
+                cekSelisihEl.checked = false;
+            }
+
+            const cariSelisihFinal = document.getElementById('cari_selisih').checked;
+
+            if (cariSelisihFinal || modeEdit) {
+                // Butuh lihat semua hitungan / semua transaksi sekaligus,
+                // jadi filter satu-hitungan-doang dimatiin sementara.
+                filterHitungan.value = '';
+                filterHitungan.disabled = true;
+            } else {
+                filterHitungan.disabled = false;
+            }
+        }
+
+        function toggleLihatPassword() {
+            const input = document.getElementById('input_password');
+            const iconTerbuka = document.getElementById('icon_mata_terbuka');
+            const iconTertutup = document.getElementById('icon_mata_tertutup');
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconTerbuka.style.display = 'none';
+                iconTertutup.style.display = 'block';
+            } else {
+                input.type = 'password';
+                iconTerbuka.style.display = 'block';
+                iconTertutup.style.display = 'none';
+            }
+        }
+
+        // FUNGSI LOGIN
+        function prosesLogin(otomatis) {
+            const cabang = otomatis || document.getElementById('select_cabang').value;
+            const password = otomatis ? PASWORD_CABANG[otomatis] : document.getElementById('input_password').value.trim();
+            const errorDiv = document.getElementById('login_error');
+
+            if (cabang && PASWORD_CABANG[cabang] === password) {
+                KOTA_AKTIF = cabang;
+                document.getElementById('label_kota_aktif').innerText = "Cabang: " + KOTA_AKTIF;
+                document.getElementById('login_modal').style.display = 'none';
+                document.getElementById('app_container').style.display = 'block';
+                errorDiv.style.display = 'none';
+
+                if (otomatis) {
+                    // Cuma auto-login abis refresh yang boleh mulihin draft lama
+                    muatDariLocalStorage();
+                } else {
+                    // Login manual (termasuk ganti cabang) selalu mulai kosong
+                    MODE_AKTIF = "masuk";
+                    DAFTAR_MASUK = [];
+                    DAFTAR_OPNAME = [];
+                    DAFTAR_BARANG = DAFTAR_MASUK;
+                    document.getElementById('tab_masuk').classList.add('tab-aktif');
+                    document.getElementById('tab_opname').classList.remove('tab-aktif');
+                    document.getElementById('judul_daftar').innerText = 'Daftar Barang Masuk';
+                    document.getElementById('judul_rekap').innerText = 'Rekap Gabungan Per-Penginput (Barang Masuk)';
+                    renderTabel();
+                }
+
+                try {
+                    localStorage.setItem('sesi_cabang_aktif', cabang);
+                } catch (e) {}
+
+                cekProsesTerputus();
+            } else if (!otomatis) {
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function tandaiSedangKirim(items, gudang) {
+            try {
+                localStorage.setItem('sedang_kirim_' + KOTA_AKTIF, JSON.stringify({
+                    items: items,
+                    gudang: gudang,
+                    waktu: new Date().toLocaleString('id-ID')
+                }));
+            } catch (e) {}
+        }
+
+        function hapusTandaSedangKirim() {
+            try {
+                localStorage.removeItem('sedang_kirim_' + KOTA_AKTIF);
+            } catch (e) {}
+        }
+
+        function cekProsesTerputus() {
+            try {
+                const raw = localStorage.getItem('sedang_kirim_' + KOTA_AKTIF);
+                if (!raw) return;
+
+                const data = JSON.parse(raw);
+                const daftarKode = data.items.map(i => i.kode + " (qty " + i.qty + ")").join(", ");
+
+                alert(
+                    "⚠️ PERINGATAN\n\n" +
+                    "Ada proses \"Simpan ke Server\" sebelumnya (" + data.waktu + ", gudang: " + data.gudang + ") yang keputus sebelum sempat dikonfirmasi berhasil atau gagal — kemungkinan karena refresh, sinyal hilang, atau HP mati.\n\n" +
+                    "Barang yang waktu itu mau disimpan:\n" + daftarKode + "\n\n" +
+                    "SEBELUM input/simpan lagi, cek dulu manual ke spreadsheet apakah data ini SUDAH masuk atau BELUM, supaya gak kesimpen dobel."
+                );
+
+                hapusTandaSedangKirim();
+            } catch (e) {}
+        }
+
+        function logout() {
+            if (!confirm("Yakin mau keluar dan kembali ke halaman login?")) return;
+
+            try {
+                localStorage.removeItem('sesi_cabang_aktif');
+                if (KOTA_AKTIF) {
+                    localStorage.removeItem('draft_masuk_' + KOTA_AKTIF);
+                    localStorage.removeItem('draft_opname_' + KOTA_AKTIF);
+                }
+            } catch (e) {}
+
+            KOTA_AKTIF = "";
+            MODE_AKTIF = "masuk";
+            DAFTAR_MASUK = [];
+            DAFTAR_OPNAME = [];
+            DAFTAR_BARANG = DAFTAR_MASUK;
+            document.getElementById('tab_masuk').classList.add('tab-aktif');
+            document.getElementById('tab_opname').classList.remove('tab-aktif');
+            document.getElementById('judul_daftar').innerText = 'Daftar Barang Masuk';
+            document.getElementById('judul_rekap').innerText = 'Rekap Gabungan Per-Penginput (Barang Masuk)';
+            renderTabel();
+            document.getElementById('input_password').value = '';
+            document.getElementById('select_cabang').value = '';
+            document.getElementById('peringatan_auto_login').style.display = 'none';
+            document.getElementById('app_container').style.display = 'none';
+            document.getElementById('login_modal').style.display = 'flex';
+        }
+
+        function cekSesiTersimpan() {
+            try {
+                const cabangTersimpan = localStorage.getItem('sesi_cabang_aktif');
+                if (cabangTersimpan && PASWORD_CABANG[cabangTersimpan]) {
+                    prosesLogin(cabangTersimpan);
+                    document.getElementById('peringatan_auto_login').style.display = 'block';
+                }
+            } catch (e) {}
+        }
+
+                function adjustQty(amount) {
+            const qtyInput = document.getElementById('qty');
+            let currentVal = parseInt(qtyInput.value) || 0;
+            currentVal += amount;
+            if (currentVal < 1) currentVal = 1;
+            qtyInput.value = currentVal;
+        }
+
+        function renderTabel() {
+            const tbody = document.getElementById('tabel_body');
+            tbody.innerHTML = '';
+
+            DAFTAR_BARANG.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'baris-muncul';
+                tr.innerHTML = `
+                    <td>${item.kode}</td>
+                    <td style="text-align: center;">${item.qty}</td>
+                    <td class="no-print" style="text-align: center;">
+                        <button class="btn btn-danger" onclick="hapusBarang(${index})">Hapus</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function tambahBarang() {
+            const kode = document.getElementById('kode_barang').value.trim();
+            const qty = parseInt(document.getElementById('qty').value) || 0;
+
+            if (!kode || qty <= 0) {
+                alert("Silakan isi kode barang dan Qty dengan benar!");
+                return;
+            }
+
+            DAFTAR_BARANG.push({ kode, qty });
+            renderTabel();
+            simpanKeLocalStorage();
+
+            document.getElementById('kode_barang').value = '';
+            document.getElementById('qty').value = '';
+        }
+
+        function hapusBarang(index) {
+            DAFTAR_BARANG.splice(index, 1);
+            renderTabel();
+            simpanKeLocalStorage();
+        }
+
+        function hapusSemua() {
+            if (confirm("Yakin ingin menghapus seluruh daftar barang?")) {
+                DAFTAR_BARANG = [];
+                renderTabel();
+                simpanKeLocalStorage();
+            }
+        }
+
+        function simpanKeLocalStorage() {
+            try {
+                localStorage.setItem('draft_' + MODE_AKTIF + '_' + KOTA_AKTIF, JSON.stringify(DAFTAR_BARANG));
+            } catch (e) {
+                // localStorage gak tersedia, abaikan diam-diam
+            }
+        }
+
+        function muatDariLocalStorage() {
+            try {
+                const raw = localStorage.getItem('draft_' + MODE_AKTIF + '_' + KOTA_AKTIF);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (Array.isArray(data) && data.length > 0) {
+                    DAFTAR_BARANG = data;
+                    renderTabel();
+                    alert("Draft " + (MODE_AKTIF === 'masuk' ? 'Barang Masuk' : 'Stock Opname') + " yang belum tersimpan ditemukan (" + data.length + " item) dan sudah dipulihkan.");
+                }
+            } catch (e) {
+                // draft rusak/gak valid, abaikan
+            }
+        }
+
+        function cetakStruk() {
+            const namaGudang = document.getElementById('nama_gudang').value.trim();
+            const jumlahKolian = document.getElementById('jumlah_kolian').value.trim();
+            
+            document.getElementById('print-date').innerText = "Tanggal: " + new Date().toLocaleString('id-ID');
+            document.getElementById('print-gudang').innerText = "Penginput / Gudang: " + (namaGudang || "-");
+            document.getElementById('print-kolian').innerText = "Jumlah Kolian: " + (jumlahKolian || "-");
+
+            // Gabungkan kode yang sama jadi satu baris khusus buat versi cetak,
+            // tampilan di layar (Daftar Barang Masuk) tetap gak berubah.
+            const gabung = {};
+            DAFTAR_BARANG.forEach(item => {
+                if (!gabung[item.kode]) {
+                    gabung[item.kode] = { kode: item.kode, qty: 0 };
+                }
+                gabung[item.kode].qty += Number(item.qty) || 0;
+            });
+
+            const tbody = document.getElementById('tabel_body');
+            const tampilanAsli = tbody.innerHTML;
+
+            tbody.innerHTML = '';
+            Object.values(gabung).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'baris-muncul';
+                tr.innerHTML = `
+                    <td>${item.kode}</td>
+                    <td style="text-align: center;">${item.qty}</td>
+                    <td class="no-print"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            let sudahDikembalikan = false;
+            function kembalikanTabel() {
+                if (sudahDikembalikan) return;
+                sudahDikembalikan = true;
+                tbody.innerHTML = tampilanAsli;
+            }
+
+            window.onafterprint = function() {
+                kembalikanTabel();
+                window.onafterprint = null;
+            };
+
+            window.print();
+
+            // Fallback buat browser yang gak trigger onafterprint dengan baik
+            setTimeout(kembalikanTabel, 2000);
+        }
+
+        // FUNGSI 1: Kirim Input Barang Masuk / Stock Opname ke Google Sheets
+        function kirimKeServer(btn) {
+    const gudang = document.getElementById('nama_gudang').value.trim();
+    if (!gudang) {
+        alert("Nama Penginput / Gudang wajib diisi!");
+        return;
+    }
+    if (DAFTAR_BARANG.length === 0) {
+        alert("Daftar barang masih kosong!");
+        return;
+    }
+
+    let hitunganKe = "";
+    let merkOpname = "";
+    if (MODE_AKTIF === 'opname') {
+        hitunganKe = document.getElementById('hitungan_ke').value.trim();
+        if (!hitunganKe) {
+            alert("Isi \"Hitungan Ke-\" dulu (misal: 1, 2, atau 3)!");
+            return;
+        }
+        merkOpname = document.getElementById('merk_opname').value.trim();
+        if (!merkOpname) {
+            alert("Pilih \"Merk / Kategori Barang\" dulu (Dura, Daytona, atau Osram)!");
+            return;
+        }
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Mengirim...";
+    document.getElementById('loading_overlay').style.display = 'flex';
+    tandaiSedangKirim(DAFTAR_BARANG, gudang);
+
+    const batchId = Date.now() + '-' + Math.random().toString(36).substring(2, 11);
+
+    // PAYLOAD DISESUAIKAN DENGAN KEBUTUHAN APPS SCRIPT
+    const payload = {
+        action: "simpan",        // WAJIB: Sesuai dengan pembacaan 'data.action' di Apps Script
+        cabang: KOTA_AKTIF,      // Sesuai dengan 'data.cabang'
+        jenis: MODE_AKTIF,       // "masuk" atau "opname" — nentuin sheet mana yang dipakai
+        hitungan: hitunganKe,    // Cuma keisi kalau mode opname
+        merk: merkOpname,        // Cuma keisi kalau mode opname (Dura/Daytona/Osram)
+        batchId: batchId,        // Nomor tiket unik, dipakai server buat nolak kiriman dobel
+        gudang: gudang,          // WAJIB: Menggunakan 'gudang' agar pas dengan 'data.gudang'
+        items: DAFTAR_BARANG     // Array barang
+    };
+
+    fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(resData => {
+        if (resData.status === "success") {
+            alert("Berhasil: " + resData.message);
+            DAFTAR_BARANG = [];
+            simpanKeLocalStorage();
+            renderTabel();
+            document.getElementById('nama_gudang').value = '';
+            if (MODE_AKTIF === 'opname') {
+                document.getElementById('hitungan_ke').value = '';
+                document.getElementById('merk_opname').value = '';
+            }
+            hapusTandaSedangKirim();
+        } else {
+            // Server sempat jawab tegas "gagal" — berarti kepastian: pasti gak kesimpen.
+            alert("Gagal: " + resData.message);
+            hapusTandaSedangKirim();
+        }
+    })
+    .catch(err => {
+        // Koneksi putus di tengah jalan — statusnya AMBIGU (bisa jadi kesimpen,
+        // bisa jadi enggak). Tanda "sedang kirim" SENGAJA gak dihapus di sini,
+        // biar muncul peringatan pas login lagi.
+        alert("Terjadi kesalahan koneksi/server: " + err + "\n\nStatus data ini gak pasti — cek manual ke spreadsheet.");
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerText = "Simpan ke Server";
+        document.getElementById('loading_overlay').style.display = 'none';
+    });
+}
+
+        // FUNGSI 2: Tarik Data Rekap Per-Cabang
+        function muatRekap() {
+            if (!KOTA_AKTIF) {
+                alert("Cabang belum teridentifikasi! Silakan login ulang.");
+                return;
+            }
+
+            const tbody = document.getElementById('rekap_body');
+            tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Memuat data rekap dari server...</td></tr>';
+
+            const payload = {
+                action: "muat_rekap",
+                cabang: KOTA_AKTIF,
+                jenis: MODE_AKTIF
+            };
+
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(response => {
+                if (response.status === "success") {
+                    const dariVal = document.getElementById('filter_dari').value;
+                    const sampaiVal = document.getElementById('filter_sampai').value;
+                    const dariDate = dariVal ? new Date(dariVal + 'T00:00:00') : null;
+                    const sampaiDate = sampaiVal ? new Date(sampaiVal + 'T23:59:59') : null;
+
+                    let data = response.data;
+                    if (dariDate || sampaiDate) {
+                        data = data.filter(item => {
+                            const t = new Date(item.timestamp);
+                            if (dariDate && t < dariDate) return false;
+                            if (sampaiDate && t > sampaiDate) return false;
+                            return true;
+                        });
+                    }
+
+                    if (MODE_AKTIF === 'opname') {
+                        const filterMerk = document.getElementById('filter_merk').value.trim();
+                        if (filterMerk) {
+                            data = data.filter(item => String(item.merk).trim() === filterMerk);
+                        }
+                    }
+
+                    let modeSelisihAktif = false;
+                    const modeEditAktif = document.getElementById('mode_edit').checked;
+
+                    if (MODE_AKTIF === 'opname' && !modeEditAktif) {
+                        modeSelisihAktif = document.getElementById('cari_selisih').checked;
+                        const filterHitungan = document.getElementById('filter_hitungan').value.trim();
+                        if (!modeSelisihAktif && filterHitungan) {
+                            data = data.filter(item => String(item.hitungan).trim() === filterHitungan);
+                        }
+                    }
+
+                    if (modeEditAktif) {
+                        renderModeEdit(data);
+                    } else if (modeSelisihAktif) {
+                        prosesDanRenderSelisih(data);
+                    } else {
+                        prosesDanRenderRekap(data);
+                    }
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:red;">Gagal memuat rekap</td></tr>';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:red;">Kesalahan koneksi ke server</td></tr>';
+            });
+        }
+
+        // FUNGSI KHUSUS: Tampilkan tiap transaksi apa adanya (gak diringkas),
+        // dengan tombol Edit/Hapus per baris — biar bisa benerin kesalahan
+        // (misal kejadian data dobel) tanpa buka spreadsheet.
+        function renderModeEdit(rawData) {
+            const isOpname = (MODE_AKTIF === 'opname');
+
+            const theadTr = document.getElementById('rekap_header');
+            let headerHTML = `<th>Waktu</th><th>Gudang</th>`;
+            if (isOpname) headerHTML += `<th>Hitungan</th><th>Merk</th>`;
+            headerHTML += `<th>Kode</th><th style="text-align:center;">Qty</th><th style="text-align:center;">Aksi</th>`;
+            theadTr.innerHTML = headerHTML;
+
+            const tbody = document.getElementById('rekap_body');
+            tbody.innerHTML = '';
+
+            const kolomTotal = isOpname ? 7 : 5;
+
+            if (rawData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="' + kolomTotal + '" style="text-align:center; color:#64748b;">Belum ada data buat rentang tanggal ini.</td></tr>';
+                return;
+            }
+
+            // Urutkan dari yang paling baru biar gampang nemu transaksi terakhir
+            const dataUrut = [...rawData].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            dataUrut.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'baris-muncul';
+                const waktuTampil = new Date(item.timestamp).toLocaleString('id-ID');
+
+                let rowHTML = `
+                    <td style="font-size: 12px;">${waktuTampil}</td>
+                    <td>${item.gudang}</td>
+                `;
+                if (isOpname) {
+                    rowHTML += `<td>${item.hitungan || '-'}</td><td>${item.merk || '-'}</td>`;
+                }
+                rowHTML += `
+                    <td><strong>${item.kode}</strong></td>
+                    <td style="text-align: center;">${item.qty}</td>
+                    <td style="text-align: center;">
+                `;
+
+                if (item.id) {
+                    rowHTML += `
+                        <button class="btn btn-danger" style="background: var(--primary); margin-bottom: 4px;" onclick="editBarisRekap('${item.id}', ${item.qty})">Edit</button>
+                        <button class="btn btn-danger" onclick="hapusBarisRekap('${item.id}')">Hapus</button>
+                    `;
+                } else {
+                    rowHTML += `<span style="font-size: 11px; color: #94a3b8;">Data lama,<br>gak bisa diedit</span>`;
+                }
+
+                rowHTML += `</td>`;
+                tr.innerHTML = rowHTML;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function editBarisRekap(id, qtyLama) {
+            const qtyBaruStr = prompt("Ubah Qty jadi berapa?", qtyLama);
+            if (qtyBaruStr === null) return; // batal
+
+            const qtyBaru = parseInt(qtyBaruStr);
+            if (isNaN(qtyBaru) || qtyBaru < 0) {
+                alert("Qty harus berupa angka!");
+                return;
+            }
+
+            const payload = {
+                action: "edit_baris",
+                cabang: KOTA_AKTIF,
+                jenis: MODE_AKTIF,
+                idBaris: id,
+                qtyBaru: qtyBaru
+            };
+
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(resData => {
+                alert(resData.status === "success" ? "Berhasil diedit!" : "Gagal: " + resData.message);
+                if (resData.status === "success") muatRekap();
+            })
+            .catch(err => alert("Gagal konek ke server: " + err));
+        }
+
+        function hapusBarisRekap(id) {
+            if (!confirm("Yakin mau hapus baris transaksi ini? Ini akan langsung menghapus dari spreadsheet dan gak bisa dibatalkan.")) return;
+
+            const payload = {
+                action: "hapus_baris",
+                cabang: KOTA_AKTIF,
+                jenis: MODE_AKTIF,
+                idBaris: id
+            };
+
+            fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(resData => {
+                alert(resData.status === "success" ? "Berhasil dihapus!" : "Gagal: " + resData.message);
+                if (resData.status === "success") muatRekap();
+            })
+            .catch(err => alert("Gagal konek ke server: " + err));
+        }
+
+        // FUNGSI 3: Mengolah Data Mentah Menjadi Tabel Matrix Per-Penginput
+        function cekSemuaBaris(checkboxTotal) {
+            const tr = checkboxTotal.closest('tr');
+            const semuaCheckbox = tr.querySelectorAll('input[type="checkbox"]');
+            semuaCheckbox.forEach(cb => {
+                cb.checked = checkboxTotal.checked;
+            });
+        }
+
+        // FUNGSI KHUSUS STOCK OPNAME: Bandingkan Hitungan 1/2/3/Final berdampingan per Kode
+        function prosesDanRenderSelisih(rawData) {
+            const DAFTAR_HITUNGAN = ["Hitungan 1", "Hitungan 2", "Hitungan 3", "Final"];
+            const rekapMap = {};
+
+            rawData.forEach(item => {
+                const kode = item.kode;
+                const hitungan = String(item.hitungan || "").trim();
+                if (!DAFTAR_HITUNGAN.includes(hitungan)) return;
+
+                if (!rekapMap[kode]) {
+                    rekapMap[kode] = { kode: kode, perHitungan: {} };
+                }
+                rekapMap[kode].perHitungan[hitungan] =
+                    (rekapMap[kode].perHitungan[hitungan] || 0) + Number(item.qty);
+            });
+
+            // Render header
+            const theadTr = document.getElementById('rekap_header');
+            let headerHTML = `<th>Kode</th>`;
+            DAFTAR_HITUNGAN.forEach(h => {
+                headerHTML += `<th style="text-align: center;">${h}</th>`;
+            });
+            headerHTML += `<th style="text-align: center;">Selisih</th>`;
+            theadTr.innerHTML = headerHTML;
+
+            // Render body
+            const tbody = document.getElementById('rekap_body');
+            tbody.innerHTML = '';
+
+            const semuaKode = Object.keys(rekapMap);
+            if (semuaKode.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#64748b;">Belum ada data Stock Opname buat rentang/filter ini.</td></tr>';
+                return;
+            }
+
+            semuaKode.forEach(kode => {
+                const row = rekapMap[kode];
+                const nilaiTerisi = DAFTAR_HITUNGAN
+                    .map(h => row.perHitungan[h])
+                    .filter(v => v !== undefined);
+
+                const adaSelisih = nilaiTerisi.length > 1 &&
+                    !nilaiTerisi.every(v => v === nilaiTerisi[0]);
+
+                const tr = document.createElement('tr');
+                tr.className = 'baris-muncul';
+                if (adaSelisih) {
+                    tr.style.background = '#fee2e2';
+                }
+
+                let rowHTML = `<td><strong>${row.kode}</strong></td>`;
+                DAFTAR_HITUNGAN.forEach(h => {
+                    const nilai = row.perHitungan[h];
+                    rowHTML += `<td style="text-align: center;">${nilai !== undefined ? nilai : '-'}</td>`;
+                });
+
+                if (nilaiTerisi.length === 0) {
+                    rowHTML += `<td style="text-align: center;">-</td>`;
+                } else if (adaSelisih) {
+                    const selisihAngka = Math.max(...nilaiTerisi) - Math.min(...nilaiTerisi);
+                    rowHTML += `<td style="text-align: center; color: #dc2626; font-weight: bold;">⚠️ BEDA (${selisihAngka})</td>`;
+                } else {
+                    rowHTML += `<td style="text-align: center; color: #16a34a; font-weight: bold;">✓ Cocok</td>`;
+                }
+
+                tr.innerHTML = rowHTML;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function prosesDanRenderRekap(rawData) {
+            if (!rawData || rawData.length === 0) {
+                document.getElementById('rekap_body').innerHTML = '<tr><td colspan="2" style="text-align:center;">Belum ada data transaksi di cabang ini.</td></tr>';
+                return;
+            }
+
+            // 1. Ambil daftar unik penginput (Gudang/Orang)
+            const setPenginput = new Set();
+            rawData.forEach(item => setPenginput.add(item.gudang));
+            const listPenginput = Array.from(setPenginput);
+
+            // 2. Kelompokkan total Qty per Kode Barang dan Penginput
+            const rekapMap = {};
+
+            rawData.forEach(item => {
+                const key = item.kode;
+                if (!rekapMap[key]) {
+                    rekapMap[key] = {
+                        kode: item.kode,
+                        qtyPerUser: {},
+                        total: 0
+                    };
+                }
+                if (!rekapMap[key].qtyPerUser[item.gudang]) {
+                    rekapMap[key].qtyPerUser[item.gudang] = 0;
+                }
+                
+                const qtyNum = parseInt(item.qty) || 0;
+                rekapMap[key].qtyPerUser[item.gudang] += qtyNum;
+                rekapMap[key].total += qtyNum;
+            });
+
+            // 3. Render Header Tabel
+            const theadTr = document.getElementById('rekap_header');
+            let headerHTML = `<th>Kode</th>`;
+            listPenginput.forEach(nama => {
+                headerHTML += `<th style="text-align: center;">${nama}</th>`;
+            });
+            headerHTML += `<th style="text-align: center;">Total</th>`;
+            theadTr.innerHTML = headerHTML;
+
+            // 4. Render Body Tabel dengan Checkbox Per Cell
+            const tbody = document.getElementById('rekap_body');
+            tbody.innerHTML = '';
+
+            Object.values(rekapMap).forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'baris-muncul';
+                let rowHTML = `
+                    <td>${row.kode}</td>
+                `;
+
+                // Iterasi kolom per-penginput
+                listPenginput.forEach(nama => {
+                    const qty = row.qtyPerUser[nama] || 0;
+                    if (qty > 0) {
+                        rowHTML += `
+                            <td style="text-align: center;">
+                                <div class="cell-check">
+                                    <input type="checkbox">
+                                    <span>${qty}</span>
+                                </div>
+                            </td>
+                        `;
+                    } else {
+                        rowHTML += `
+                            <td style="text-align: center; color: #94a3b8;">0</td>
+                        `;
+                    }
+                });
+
+                // Kolom Total — checklist ini otomatis ceklis semua cell di baris yang sama
+                if (row.total > 0) {
+                    rowHTML += `
+                        <td style="text-align: center;">
+                            <div class="cell-check">
+                                <input type="checkbox" onchange="cekSemuaBaris(this)">
+                                <span>${row.total}</span>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    rowHTML += `
+                        <td style="text-align: center; color: #94a3b8;">0</td>
+                    `;
+                }
+
+                tr.innerHTML = rowHTML;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.onload = function() {
+            cekSesiTersimpan();
+        };
+    </script>
+</body>
+</html>
