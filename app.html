@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Input Barang Datang</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -400,7 +403,7 @@
             <div class="form-group">
                 <label for="input_password">Password Cabang</label>
                 <div style="position: relative;">
-                    <input type="password" id="input_password" placeholder="Masukkan password..." autocomplete="off" style="width: 100%; padding-right: 44px; box-sizing: border-box;">
+                    <input type="password" id="input_password" placeholder="Masukkan password..." autocomplete="off" style="width: 100%; padding-right: 44px; box-sizing: border-box;" onkeydown="if(event.key === 'Enter') prosesLogin()">
                     <button type="button" onclick="toggleLihatPassword()" id="btn_toggle_pw" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; color: #64748b;">
                         <svg id="icon_mata_terbuka" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -580,6 +583,10 @@
             </div>
 
             <button class="btn btn-primary" onclick="muatRekap()" style="margin-bottom: 12px;">Muat / Refresh Rekap</button>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <button class="btn btn-print" onclick="downloadRekapExcel()" style="flex: 1;">📥 Excel</button>
+                <button class="btn btn-print" onclick="downloadRekapPDF()" style="flex: 1;">📥 PDF</button>
+            </div>
 
             <div class="table-container">
                 <table>
@@ -782,6 +789,7 @@
             DAFTAR_MASUK = [];
             DAFTAR_OPNAME = [];
             DAFTAR_BARANG = DAFTAR_MASUK;
+            CENTANG_REKAP = {};
             document.getElementById('tab_masuk').classList.add('tab-aktif');
             document.getElementById('tab_opname').classList.remove('tab-aktif');
             document.getElementById('judul_daftar').innerText = 'Daftar Barang Masuk';
@@ -1018,6 +1026,80 @@
 }
 
         // FUNGSI 2: Tarik Data Rekap Per-Cabang
+        // Ambil tabel Rekap yang lagi kebuka di layar (apa adanya: bisa rekap biasa,
+        // Cari Selisih, atau Mode Edit) buat dijadikan file Excel/PDF.
+        function ambilDataTabelRekap() {
+            const headerRow = document.getElementById('rekap_header');
+            const bodyRows = document.getElementById('rekap_body').querySelectorAll('tr');
+
+            if (!headerRow || bodyRows.length === 0 || document.getElementById('rekap_body').querySelector('td[colspan]')) {
+                return null;
+            }
+
+            const headerTeks = Array.from(headerRow.querySelectorAll('th')).map(th => th.innerText.trim());
+
+            const dataBaris = [];
+            bodyRows.forEach(tr => {
+                const selNilai = Array.from(tr.querySelectorAll('td')).map(td => {
+                    // Kalau ada checkbox di cell, ambil teksnya aja (angka), bukan HTML checkbox-nya
+                    const span = td.querySelector('span');
+                    if (span) return span.innerText.trim();
+                    // Buang tombol Edit/Hapus kalau lagi di Mode Edit
+                    if (td.querySelector('button')) return '';
+                    return td.innerText.trim();
+                });
+                dataBaris.push(selNilai);
+            });
+
+            return { header: headerTeks, rows: dataBaris };
+        }
+
+        function namaFileRekap() {
+            const modeLabel = (MODE_AKTIF === 'opname') ? 'StockOpname' : 'BarangMasuk';
+            const tanggal = new Date().toISOString().slice(0, 10);
+            return 'Rekap_' + modeLabel + '_' + KOTA_AKTIF + '_' + tanggal;
+        }
+
+        function downloadRekapExcel() {
+            const data = ambilDataTabelRekap();
+            if (!data) {
+                alert("Belum ada data rekap buat di-download. Tekan \"Muat / Refresh Rekap\" dulu.");
+                return;
+            }
+
+            const worksheet = XLSX.utils.aoa_to_sheet([data.header, ...data.rows]);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap");
+            XLSX.writeFile(workbook, namaFileRekap() + ".xlsx");
+        }
+
+        function downloadRekapPDF() {
+            const data = ambilDataTabelRekap();
+            if (!data) {
+                alert("Belum ada data rekap buat di-download. Tekan \"Muat / Refresh Rekap\" dulu.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const modeLabel = (MODE_AKTIF === 'opname') ? 'STOCK OPNAME' : 'BARANG MASUK';
+            doc.setFontSize(14);
+            doc.text('REKAP ' + modeLabel, 14, 15);
+            doc.setFontSize(10);
+            doc.text('Cabang: ' + KOTA_AKTIF, 14, 22);
+            doc.text('Dicetak: ' + new Date().toLocaleString('id-ID'), 14, 27);
+
+            doc.autoTable({
+                head: [data.header],
+                body: data.rows,
+                startY: 32,
+                styles: { fontSize: 8 }
+            });
+
+            doc.save(namaFileRekap() + ".pdf");
+        }
+
         function muatRekap() {
             if (!KOTA_AKTIF) {
                 alert("Cabang belum teridentifikasi! Silakan login ulang.");
@@ -1201,11 +1283,24 @@
         }
 
         // FUNGSI 3: Mengolah Data Mentah Menjadi Tabel Matrix Per-Penginput
+        // Nyimpen status checklist di Rekap biar gak reset kalau "Muat / Refresh Rekap"
+        // gak sengaja kepencet ulang. Key-nya: mode|kode|kolom.
+        let CENTANG_REKAP = {};
+
+        function simpanCentangRekap(checkbox) {
+            if (checkbox.dataset.key) {
+                CENTANG_REKAP[checkbox.dataset.key] = checkbox.checked;
+            }
+        }
+
         function cekSemuaBaris(checkboxTotal) {
             const tr = checkboxTotal.closest('tr');
             const semuaCheckbox = tr.querySelectorAll('input[type="checkbox"]');
             semuaCheckbox.forEach(cb => {
                 cb.checked = checkboxTotal.checked;
+                if (cb.dataset.key) {
+                    CENTANG_REKAP[cb.dataset.key] = cb.checked;
+                }
             });
         }
 
@@ -1336,10 +1431,12 @@
                 listPenginput.forEach(nama => {
                     const qty = row.qtyPerUser[nama] || 0;
                     if (qty > 0) {
+                        const key = MODE_AKTIF + '|' + row.kode + '|' + nama;
+                        const dicentang = CENTANG_REKAP[key] ? 'checked' : '';
                         rowHTML += `
                             <td style="text-align: center;">
                                 <div class="cell-check">
-                                    <input type="checkbox">
+                                    <input type="checkbox" data-key="${key}" ${dicentang} onchange="simpanCentangRekap(this)">
                                     <span>${qty}</span>
                                 </div>
                             </td>
@@ -1353,10 +1450,12 @@
 
                 // Kolom Total — checklist ini otomatis ceklis semua cell di baris yang sama
                 if (row.total > 0) {
+                    const keyTotal = MODE_AKTIF + '|' + row.kode + '|__TOTAL__';
+                    const dicentangTotal = CENTANG_REKAP[keyTotal] ? 'checked' : '';
                     rowHTML += `
                         <td style="text-align: center;">
                             <div class="cell-check">
-                                <input type="checkbox" onchange="cekSemuaBaris(this)">
+                                <input type="checkbox" data-key="${keyTotal}" ${dicentangTotal} onchange="cekSemuaBaris(this)">
                                 <span>${row.total}</span>
                             </div>
                         </td>
