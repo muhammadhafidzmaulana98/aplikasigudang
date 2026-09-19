@@ -607,7 +607,7 @@
 
     <script>
         // Gantilah dengan URL Web App dari Apps Script kamu
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzJfbwihwHkBZWHAePKbKIaWY-46_kndJ9y7OhxDSuB9b6z3f6dFGJ_h2ikgylvA2sZXw/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbynmpSJ76GpduCkgjSXE8C1TCECYhixHQpQCy2TEG6Cz4QjjXwW1Scp3JvboQ0RVaDZhg/exec";
 
         // PASSWORD PER CABANG
         const PASWORD_CABANG = {
@@ -957,6 +957,7 @@
 
     let hitunganKe = "";
     let merkOpname = "";
+    let jumlahKolian = "";
     if (MODE_AKTIF === 'opname') {
         hitunganKe = document.getElementById('hitungan_ke').value.trim();
         if (!hitunganKe) {
@@ -968,6 +969,8 @@
             alert("Pilih \"Merk / Kategori Barang\" dulu (Dura, Daytona, atau Osram)!");
             return;
         }
+    } else {
+        jumlahKolian = document.getElementById('jumlah_kolian').value.trim();
     }
 
     btn.disabled = true;
@@ -984,6 +987,7 @@
         jenis: MODE_AKTIF,       // "masuk" atau "opname" — nentuin sheet mana yang dipakai
         hitungan: hitunganKe,    // Cuma keisi kalau mode opname
         merk: merkOpname,        // Cuma keisi kalau mode opname (Dura/Daytona/Osram)
+        kolian: jumlahKolian,    // Cuma keisi kalau mode Barang Masuk
         batchId: batchId,        // Nomor tiket unik, dipakai server buat nolak kiriman dobel
         gudang: gudang,          // WAJIB: Menggunakan 'gudang' agar pas dengan 'data.gudang'
         items: DAFTAR_BARANG     // Array barang
@@ -1180,14 +1184,18 @@
 
             const theadTr = document.getElementById('rekap_header');
             let headerHTML = `<th>Waktu</th><th>Gudang</th>`;
-            if (isOpname) headerHTML += `<th>Hitungan</th><th>Merk</th>`;
+            if (isOpname) {
+                headerHTML += `<th>Hitungan</th><th>Merk</th>`;
+            } else {
+                headerHTML += `<th>Koli</th>`;
+            }
             headerHTML += `<th>Kode</th><th style="text-align:center;">Qty</th><th style="text-align:center;">Aksi</th>`;
             theadTr.innerHTML = headerHTML;
 
             const tbody = document.getElementById('rekap_body');
             tbody.innerHTML = '';
 
-            const kolomTotal = isOpname ? 7 : 5;
+            const kolomTotal = isOpname ? 7 : 6;
 
             if (rawData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="' + kolomTotal + '" style="text-align:center; color:#64748b;">Belum ada data buat rentang tanggal ini.</td></tr>';
@@ -1208,6 +1216,8 @@
                 `;
                 if (isOpname) {
                     rowHTML += `<td>${item.hitungan || '-'}</td><td>${item.merk || '-'}</td>`;
+                } else {
+                    rowHTML += `<td>${item.kolian || '-'}</td>`;
                 }
                 rowHTML += `
                     <td><strong>${item.kode}</strong></td>
@@ -1469,6 +1479,38 @@
                 tr.innerHTML = rowHTML;
                 tbody.appendChild(tr);
             });
+
+            // Baris tambahan "Jumlah Koli" di paling bawah — cuma buat Barang Masuk,
+            // karena koli itu nilai per gudang/pengiriman, bukan per kode barang.
+            // Dihitung per (gudang + waktu kirim) biar gak double-hitung kalau satu
+            // pengiriman ada banyak kode barang sekaligus.
+            if (MODE_AKTIF === 'masuk') {
+                const batchUnik = new Set();
+                const koliPerGudang = {};
+
+                rawData.forEach(item => {
+                    const kunciBatch = item.gudang + '|' + item.timestamp;
+                    if (!batchUnik.has(kunciBatch)) {
+                        batchUnik.add(kunciBatch);
+                        const koli = Number(item.kolian) || 0;
+                        koliPerGudang[item.gudang] = (koliPerGudang[item.gudang] || 0) + koli;
+                    }
+                });
+
+                const trKoli = document.createElement('tr');
+                trKoli.style.fontWeight = 'bold';
+                trKoli.style.borderTop = '2px solid #334155';
+                let koliHTML = `<td>Jumlah Koli</td>`;
+                let totalKoliSemua = 0;
+                listPenginput.forEach(nama => {
+                    const nilaiKoli = koliPerGudang[nama] || 0;
+                    totalKoliSemua += nilaiKoli;
+                    koliHTML += `<td style="text-align: center;">${nilaiKoli}</td>`;
+                });
+                koliHTML += `<td style="text-align: center;">${totalKoliSemua}</td>`;
+                trKoli.innerHTML = koliHTML;
+                tbody.appendChild(trKoli);
+            }
         }
 
         window.onload = function() {
