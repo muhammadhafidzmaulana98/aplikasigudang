@@ -384,8 +384,34 @@
     </div>
 
     <!-- MODAL LOGIN AWAL -->
-    <div id="login_modal" class="login-overlay">
+    <!-- ============ HALAMAN PILIH MODUL (paling pertama muncul) ============ -->
+    <div id="pilih_modul_overlay" class="login-overlay">
         <div class="login-card">
+            <h2>Pilih Modul</h2>
+            <p>Mau masuk ke bagian mana?</p>
+
+            <button class="btn btn-primary" style="margin-bottom: 12px; text-align: left; display: flex; align-items: center; gap: 12px; padding: 18px;" onclick="tampilkanLoginGudang()">
+                <span style="font-size: 24px;">📦</span>
+                <span>
+                    <div style="font-weight: 700; font-size: 15px;">Barang Masuk / Gudang</div>
+                    <div style="font-weight: 400; font-size: 12px; opacity: 0.85;">Input barang masuk & Stock Opname</div>
+                </span>
+            </button>
+
+            <button class="btn btn-primary" style="text-align: left; display: flex; align-items: center; gap: 12px; padding: 18px; background: #16a34a;" onclick="tampilkanLoginOperasional()">
+                <span style="font-size: 24px;">🚚</span>
+                <span>
+                    <div style="font-weight: 700; font-size: 15px;">Operasional / Kurir</div>
+                    <div style="font-weight: 400; font-size: 12px; opacity: 0.85;">Laporan harian kurir</div>
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <div id="login_modal" class="login-overlay" style="display: none;">
+        <div class="login-card">
+            <button type="button" onclick="kembaliKePilihModul()" style="background: none; border: none; color: var(--primary); font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">← Kembali</button>
+
             <h2>Masuk Sistem Gudang</h2>
             <p>Pilih cabang dan masukkan password untuk mengakses aplikasi</p>
 
@@ -425,6 +451,263 @@
             </div>
 
             <button class="btn btn-primary" id="btn_login" onclick="prosesLogin()">Masuk</button>
+        </div>
+    </div>
+
+    <!-- ============ LOGIN OPERASIONAL (rangka tampilan, belum ada logika/backend) ============ -->
+    <div id="login_operasional_overlay" class="login-overlay" style="display: none;">
+        <div class="login-card">
+            <button type="button" onclick="kembaliKePilihModul()" style="background: none; border: none; color: #16a34a; font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">← Kembali</button>
+
+            <h2 style="color: #16a34a;">Masuk Operasional</h2>
+            <p>Login pakai username &amp; password kamu sendiri</p>
+
+            <div class="form-group">
+                <label for="op_login_area">Area</label>
+                <select id="op_login_area">
+                    <option value="">-- Pilih Area --</option>
+                    <option value="Jakarta">Jakarta</option>
+                    <option value="Serpong">Serpong</option>
+                    <option value="Solo">Solo</option>
+                    <option value="Jogja">Jogja</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="op_login_username">Username</label>
+                <input type="text" id="op_login_username" placeholder="Username kamu..." autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="op_login_password">Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="op_login_password" placeholder="Password kamu..." autocomplete="off" style="width: 100%; padding-right: 44px; box-sizing: border-box;" onkeydown="if(event.key === 'Enter') prosesLoginOperasional()">
+                    <button type="button" onclick="toggleLihatPasswordOp('op_login_password', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; color: #64748b;">👁️</button>
+                </div>
+            </div>
+
+            <div id="op_login_error" style="color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none;">
+                Username atau password salah!
+            </div>
+
+            <button class="btn btn-primary" style="background: #16a34a;" onclick="prosesLoginOperasional()">Masuk</button>
+
+            <p style="text-align: center; margin-top: 14px; font-size: 13px;">
+                Belum punya akun?
+                <a href="#" onclick="tampilkanDaftarOperasional(); return false;" style="color: #16a34a; font-weight: 600;">Daftar di sini</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ============ DAFTAR AKUN OPERASIONAL (bikin akun sendiri) ============ -->
+    <div id="daftar_operasional_overlay" class="login-overlay" style="display: none;">
+        <div class="login-card">
+            <button type="button" onclick="tampilkanLoginOperasional()" style="background: none; border: none; color: #16a34a; font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">← Kembali ke Login</button>
+
+            <h2 style="color: #16a34a;">Daftar Akun Operasional</h2>
+            <p>Bikin username &amp; password sendiri. Password ini cuma kamu yang tau.</p>
+
+            <div class="form-group">
+                <label for="op_daftar_area">Area</label>
+                <select id="op_daftar_area">
+                    <option value="">-- Pilih Area --</option>
+                    <option value="Jakarta">Jakarta</option>
+                    <option value="Serpong">Serpong</option>
+                    <option value="Solo">Solo</option>
+                    <option value="Jogja">Jogja</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="op_daftar_username">Username</label>
+                <input type="text" id="op_daftar_username" placeholder="Bikin username..." autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="op_daftar_telepon">Nomor Telepon</label>
+                <input type="tel" id="op_daftar_telepon" placeholder="Nomor HP kamu..." autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="op_daftar_password">Password</label>
+                <div style="position: relative;">
+                    <input type="password" id="op_daftar_password" placeholder="Bikin password..." autocomplete="off" style="width: 100%; padding-right: 44px; box-sizing: border-box;">
+                    <button type="button" onclick="toggleLihatPasswordOp('op_daftar_password', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; color: #64748b;">👁️</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="op_daftar_password2">Ulangi Password</label>
+                <input type="password" id="op_daftar_password2" placeholder="Ketik ulang password..." autocomplete="off" onkeydown="if(event.key === 'Enter') prosesDaftarOperasional()">
+            </div>
+
+            <div id="op_daftar_error" style="color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none;"></div>
+
+            <button class="btn btn-primary" style="background: #16a34a;" onclick="prosesDaftarOperasional()">Daftar</button>
+
+            <p style="text-align: center; margin-top: 14px; font-size: 13px;">
+                Sudah punya akun?
+                <a href="#" onclick="tampilkanLoginOperasional(); return false;" style="color: #16a34a; font-weight: 600;">Login di sini</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD OPERASIONAL: PENGIRIMAN KE PELANGGAN/TOKO ============ -->
+    <div id="dashboard_operasional" class="app-container" style="display: none;">
+        <div class="header no-print" style="position: relative; background: #16a34a;">
+            <button onclick="logoutOperasional()" style="position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer;">← Keluar</button>
+            <h2>Operasional / Kurir</h2>
+            <p style="font-size: 12px; opacity: 0.9;" id="label_user_operasional">Login sebagai: -</p>
+        </div>
+
+        <div class="menu-tab no-print">
+            <button class="tab-btn tab-aktif" id="op_tab_baru" onclick="opGantiTab('baru')" style="border-color:#16a34a;">📝 Laporan Harian</button>
+            <button class="tab-btn" id="op_tab_gudang" onclick="opGantiTab('gudang')">🏭 Laporan Gudang</button>
+            <button class="tab-btn" id="op_tab_daftar" onclick="opGantiTab('daftar')">📋 Riwayat Saya</button>
+        </div>
+
+        <!-- FORM LAPORAN HARIAN KURIR -->
+        <div class="card" id="op_panel_baru">
+            <div class="form-group">
+                <label for="op_input_tanggal">Tanggal Laporan *</label>
+                <input type="date" id="op_input_tanggal">
+                <div style="font-size:12px; color:#64748b; margin-top:6px;">Otomatis hari ini. Kalau kirimannya kemarin/hari lain tapi baru diinput sekarang, ganti tanggalnya sesuai hari kirimannya.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="op_rute_input">Rute Area Hari Ini * <span style="font-weight:400; color:#64748b;">(ketik kode rute, contoh: D1, BKS1)</span></label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="op_rute_input" placeholder="Ketik kode rute..." autocapitalize="characters" autocomplete="off" maxlength="12"
+                        style="flex:1; text-transform:uppercase;"
+                        oninput="opBersihkanInputRute(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();opTambahRute();}">
+                    <button type="button" class="btn btn-primary" style="width:auto; padding:0 18px; background:#16a34a;" onclick="opTambahRute()">+ Tambah</button>
+                </div>
+                <div style="font-size:12px; color:#64748b; margin-top:6px;">Huruf besar & angka saja, tanpa spasi. Tambah lebih dari 1 rute kalau hari ini jalan ke beberapa rute.</div>
+                <div id="op_rute_chips" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
+            </div>
+            <div class="form-group">
+                <label for="op_input_jumlahtoko">Jumlah Toko Dikunjungi</label>
+                <input type="number" id="op_input_jumlahtoko" min="0" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="op_input_tokotidak">Toko Tidak Dikunjungi</label>
+                <input type="number" id="op_input_tokotidak" min="0" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="op_input_cash">Jumlah Faktur Cash</label>
+                <input type="number" id="op_input_cash" min="0" placeholder="0" oninput="opHitungTotalFaktur()">
+            </div>
+            <div class="form-group">
+                <label for="op_input_tempo">Jumlah Faktur Tempo</label>
+                <input type="number" id="op_input_tempo" min="0" placeholder="0" oninput="opHitungTotalFaktur()">
+            </div>
+            <div class="form-group">
+                <label for="op_input_revisi">Faktur Revisi</label>
+                <input type="number" id="op_input_revisi" min="0" placeholder="0" oninput="opHitungTotalFaktur()">
+            </div>
+            <div class="form-group">
+                <label for="op_input_rma">Faktur RMA</label>
+                <input type="number" id="op_input_rma" min="0" placeholder="0" oninput="opHitungTotalFaktur()">
+            </div>
+            <div class="form-group">
+                <label for="op_input_suratjalan">Surat Jalan</label>
+                <input type="number" id="op_input_suratjalan" min="0" placeholder="0" oninput="opHitungTotalFaktur()">
+            </div>
+            <div class="form-group">
+                <label for="op_input_fakturtidak">Faktur Tidak Dikirim</label>
+                <input type="number" id="op_input_fakturtidak" min="0" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="op_input_nilaicashtagihan">Nilai Faktur Cash + Tagihan (Rp)</label>
+                <input type="text" inputmode="numeric" id="op_input_nilaicashtagihan" placeholder="Rp0" oninput="opFormatInputRupiah(this)">
+                <div style="font-size:12px; color:#64748b; margin-top:6px;">Total uang (Rp) dari faktur cash + tagihan yang dibawa hari ini.</div>
+            </div>
+            <div class="form-group">
+                <label for="op_input_faktur">Jumlah Faktur (total dibawa)</label>
+                <input type="number" id="op_input_faktur" min="0" placeholder="0" readonly style="background:#f1f5f9; font-weight:700; color:#0f172a;">
+                <div style="font-size:12px; color:#64748b; margin-top:6px;">Otomatis = Cash + Tempo + Revisi + RMA + Surat Jalan. Gak perlu diketik manual.</div>
+            </div>
+            <button class="btn btn-primary" style="background:#16a34a;" onclick="opSimpanLaporan()">Simpan Laporan</button>
+        </div>
+
+        <!-- FORM LAPORAN GUDANG: jumlah faktur dikerjakan hari ini + rekap performa di bawahnya -->
+        <div class="card" id="op_panel_gudang" style="display:none;">
+            <div class="form-group">
+                <label for="op_gudang_tanggal">Tanggal Laporan *</label>
+                <input type="date" id="op_gudang_tanggal">
+                <div style="font-size:12px; color:#64748b; margin-top:6px;">Otomatis hari ini. Ganti kalau yang dilaporkan faktur hari lain.</div>
+            </div>
+            <div class="form-group">
+                <label for="op_gudang_jumlah">Jumlah Faktur Dikerjakan Hari Ini *</label>
+                <input type="number" id="op_gudang_jumlah" min="0" placeholder="0">
+            </div>
+            <button class="btn btn-primary" style="background:#16a34a;" onclick="opSimpanLaporanGudang()">Simpan Laporan Gudang</button>
+
+            <hr style="margin:20px 0; border:none; border-top:1px solid #e2e8f0;">
+
+            <div id="op_gudang_admin_filter_wrap" style="display:none;">
+                <div class="form-group">
+                    <label>Rentang Tanggal</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input type="date" id="op_gudang_tgl_dari" onchange="opRenderRekapGudang()" style="flex:1; min-width:0;">
+                        <span style="color:#64748b; font-size:13px;">s/d</span>
+                        <input type="date" id="op_gudang_tgl_sampai" onchange="opRenderRekapGudang()" style="flex:1; min-width:0;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="op_gudang_filter_petugas">Petugas</label>
+                    <select id="op_gudang_filter_petugas" onchange="opRenderRekapGudang()">
+                        <option value="">-- Semua Petugas --</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="background:#16a34a; margin-bottom:12px;" onclick="opMuatRiwayatGudang()">🔄 Muat / Refresh Rekap</button>
+            <div id="op_gudang_kosong" style="text-align:center; color:#64748b; padding:16px 0;">Tekan "Muat / Refresh Rekap" untuk lihat data.</div>
+
+            <div id="op_gudang_rekap" style="display:none;">
+                <div id="op_gudang_ringkasan" style="font-size:13px; color:#334155; margin-bottom:12px;"></div>
+                <div id="op_gudang_charts"></div>
+                <details style="margin-top:16px;">
+                    <summary style="cursor:pointer; font-weight:600; font-size:14px; color:#334155;">Lihat detail laporan</summary>
+                    <div id="op_gudang_detail_list" style="margin-top:10px;"></div>
+                </details>
+            </div>
+
+            <div id="op_gudang_list"></div>
+        </div>
+
+        <!-- RIWAYAT LAPORAN: punya sendiri (kurir) atau rekap + grafik (admin) -->
+        <div class="card" id="op_panel_daftar" style="display:none;">
+            <div id="op_admin_filter_wrap" style="display:none;">
+                <div class="form-group">
+                    <label>Rentang Tanggal</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input type="date" id="op_admin_tgl_dari" onchange="opRenderRiwayatTampil()" style="flex:1; min-width:0;">
+                        <span style="color:#64748b; font-size:13px;">s/d</span>
+                        <input type="date" id="op_admin_tgl_sampai" onchange="opRenderRiwayatTampil()" style="flex:1; min-width:0;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="op_admin_filter_kurir">Kurir</label>
+                    <select id="op_admin_filter_kurir" onchange="opRenderRiwayatTampil()">
+                        <option value="">-- Semua Kurir --</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="background:#16a34a; margin-bottom:12px;" onclick="opMuatRiwayat()">🔄 Muat / Refresh</button>
+            <div id="op_daftar_kosong" style="text-align:center; color:#64748b; padding:16px 0;">Tekan "Muat / Refresh" untuk lihat data.</div>
+
+            <div id="op_admin_rekap" style="display:none;">
+                <div id="op_admin_ringkasan" style="font-size:13px; color:#334155; margin-bottom:12px;"></div>
+                <div id="op_admin_charts"></div>
+                <details style="margin-top:16px;">
+                    <summary style="cursor:pointer; font-weight:600; font-size:14px; color:#334155;">Lihat detail laporan</summary>
+                    <div id="op_admin_detail_kosong" style="display:none; text-align:center; color:#64748b; padding:8px 0;"></div>
+                    <div id="op_admin_detail_list" style="margin-top:10px;"></div>
+                </details>
+            </div>
+
+            <div id="op_daftar_list"></div>
         </div>
     </div>
 
@@ -609,6 +892,10 @@
         // Gantilah dengan URL Web App dari Apps Script kamu
         const GAS_URL = "https://script.google.com/macros/s/AKfycbynmpSJ76GpduCkgjSXE8C1TCECYhixHQpQCy2TEG6Cz4QjjXwW1Scp3JvboQ0RVaDZhg/exec";
 
+        // URL Web App KHUSUS modul Operasional (deploy Code_Operasional.gs
+        // di spreadsheet TERPISAH, lalu tempel URL-nya di sini).
+        const OP_GAS_URL = "https://script.google.com/macros/s/AKfycbxpjvq1c8GgkmX1fi2dcCGpCrlr8y2eRHtPaL0dcPUmaA6nBPiyk8w08C3X42qDrKqSew/exec";
+
         // PASSWORD PER CABANG
         const PASWORD_CABANG = {
             "Jakarta": "BSAJ168",
@@ -700,6 +987,924 @@
         }
 
         // FUNGSI LOGIN
+        // Satu daftar semua ID overlay/dashboard level-atas. Setiap kali pindah
+        // layar, SEMUA ini dimatikan dulu baru satu yang dituju dinyalakan —
+        // supaya gak ada lagi kasus overlay lama "nyangkut" nutupin layar baru
+        // (bug yang sempat kejadian di tombol Kembali ke Login).
+        const SEMUA_LAYAR = [
+            'pilih_modul_overlay', 'login_modal',
+            'login_operasional_overlay', 'daftar_operasional_overlay',
+            'dashboard_operasional'
+        ];
+
+        function tampilkanLayar(idTujuan) {
+            SEMUA_LAYAR.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            const tujuan = document.getElementById(idTujuan);
+            if (tujuan) tujuan.style.display = (idTujuan === 'dashboard_operasional') ? 'block' : 'flex';
+        }
+
+        function tampilkanLoginGudang() {
+            tampilkanLayar('login_modal');
+        }
+
+        function tampilkanLoginOperasional() {
+            tampilkanLayar('login_operasional_overlay');
+        }
+
+        function kembaliKePilihModul() {
+            tampilkanLayar('pilih_modul_overlay');
+        }
+
+        function tampilkanDaftarOperasional() {
+            tampilkanLayar('daftar_operasional_overlay');
+        }
+
+        // ===================== OPERASIONAL: DAFTAR & LOGIN =====================
+        // Akun disimpan di backend (sheet "Akun" di spreadsheet Operasional),
+        // password di-hash di server — bukan plain text, dan bisa login dari
+        // HP/device mana saja, bukan cuma HP tempat daftar.
+
+        let OP_AREA_AKTIF = "";
+        let OP_USER_AKTIF = "";
+        let OP_DATA_LAPORAN = [];
+        let OP_TAB_AKTIF = "baru";
+        let ADMIN_LOGIN = false;
+        let OP_RUTE_LIST = [];
+        let OP_DAFTAR_KURIR = [];
+        let OP_SUDAH_MUAT = false;
+        let OP_DATA_LAPORAN_GUDANG = [];
+        let OP_SUDAH_MUAT_GUDANG = false;
+        const ADMIN_SEMENTARA_AKTIF = true; // ubah ke false untuk mematikan login admin123
+
+        function toggleLihatPasswordOp(idInput, tombol) {
+            const input = document.getElementById(idInput);
+            if (input.type === 'password') {
+                input.type = 'text';
+                tombol.innerText = '🙈';
+            } else {
+                input.type = 'password';
+                tombol.innerText = '👁️';
+            }
+        }
+
+        async function panggilOpGAS(payload) {
+            const res = await fetch(OP_GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            return res.json();
+        }
+
+        async function prosesDaftarOperasional() {
+            const area = document.getElementById('op_daftar_area').value;
+            const username = document.getElementById('op_daftar_username').value.trim();
+            const telepon = document.getElementById('op_daftar_telepon').value.trim();
+            const password = document.getElementById('op_daftar_password').value;
+            const password2 = document.getElementById('op_daftar_password2').value;
+            const errorDiv = document.getElementById('op_daftar_error');
+            const tombol = event ? event.target : null;
+
+            function tampilkanError(pesan) {
+                errorDiv.innerText = pesan;
+                errorDiv.style.display = 'block';
+            }
+
+            if (!area) return tampilkanError("Pilih Area dulu!");
+            if (!username || !telepon || !password || !password2) return tampilkanError("Semua kolom wajib diisi!");
+            if (password !== password2) return tampilkanError("Password dan ulangi password gak sama!");
+            if (password.length < 4) return tampilkanError("Password minimal 4 karakter!");
+
+            errorDiv.style.display = 'none';
+            if (tombol) { tombol.disabled = true; tombol.innerText = 'Memproses...'; }
+
+            try {
+                const hasil = await panggilOpGAS({
+                    action: 'daftar_akun',
+                    area, username, telepon, password
+                });
+
+                if (hasil.status !== 'success') {
+                    tampilkanError(hasil.message || 'Gagal daftar akun.');
+                    return;
+                }
+
+                alert("Akun berhasil dibuat! Silakan login.");
+                document.getElementById('op_daftar_area').value = '';
+                document.getElementById('op_daftar_username').value = '';
+                document.getElementById('op_daftar_telepon').value = '';
+                document.getElementById('op_daftar_password').value = '';
+                document.getElementById('op_daftar_password2').value = '';
+
+                document.getElementById('op_login_area').value = area;
+                document.getElementById('op_login_username').value = username;
+                tampilkanLoginOperasional();
+            } catch (e) {
+                tampilkanError("Gagal menghubungi server. Cek koneksi internet lalu coba lagi.");
+            } finally {
+                if (tombol) { tombol.disabled = false; tombol.innerText = 'Daftar'; }
+            }
+        }
+
+        async function prosesLoginOperasional() {
+            const area = document.getElementById('op_login_area').value;
+            const username = document.getElementById('op_login_username').value.trim();
+            const password = document.getElementById('op_login_password').value;
+            const errorDiv = document.getElementById('op_login_error');
+            const tombol = event ? event.target : null;
+
+            if (!area) {
+                errorDiv.innerText = "Pilih Area dulu!";
+                errorDiv.style.display = 'block';
+                return;
+            }
+            if (!username || !password) {
+                errorDiv.innerText = "Isi username dan password dulu!";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // ⚠️ LOGIN ADMIN SEMENTARA — HAPUS SEBELUM DIPAKAI KURIR BENERAN.
+            // Cukup ubah ADMIN_SEMENTARA_AKTIF jadi false (atau hapus blok ini).
+            // Kredensial ini kebaca siapa pun lewat "View Source", jadi jangan
+            // dibiarkan aktif kalau aplikasi sudah dibagikan ke orang lain.
+            if (ADMIN_SEMENTARA_AKTIF && username.toLowerCase() === 'admin123' && password === 'admin123') {
+                errorDiv.style.display = 'none';
+                document.getElementById('op_login_password').value = '';
+                masukKeDashboardAdmin(area);
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            if (tombol) { tombol.disabled = true; tombol.innerText = 'Memproses...'; }
+
+            try {
+                const hasil = await panggilOpGAS({ action: 'login_akun', area, username, password });
+
+                if (hasil.status !== 'success') {
+                    errorDiv.innerText = hasil.message || "Username atau password salah!";
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                masukKeDashboardOperasional(hasil.akun.area, hasil.akun.username);
+
+                try {
+                    localStorage.setItem('sesi_operasional', JSON.stringify({ area: hasil.akun.area, username: hasil.akun.username }));
+                } catch (e) {}
+
+                document.getElementById('op_login_area').value = '';
+                document.getElementById('op_login_username').value = '';
+                document.getElementById('op_login_password').value = '';
+            } catch (e) {
+                errorDiv.innerText = "Gagal menghubungi server. Cek koneksi internet lalu coba lagi.";
+                errorDiv.style.display = 'block';
+            } finally {
+                if (tombol) { tombol.disabled = false; tombol.innerText = 'Masuk'; }
+            }
+        }
+
+        function masukKeDashboardOperasional(area, username) {
+            OP_RUTE_LIST = [];
+            opRenderRuteChips();
+            OP_AREA_AKTIF = area;
+            OP_USER_AKTIF = username;
+            OP_DATA_LAPORAN = [];
+            ADMIN_LOGIN = false;
+
+            document.getElementById('op_admin_filter_wrap').style.display = 'none';
+            document.getElementById('op_gudang_admin_filter_wrap').style.display = 'none';
+            opResetTampilanRiwayat();
+            opResetTampilanGudang();
+            document.getElementById('op_tab_daftar').innerText = '📋 Riwayat Saya';
+
+            tampilkanLayar('dashboard_operasional');
+            document.getElementById('label_user_operasional').innerText = "Login sebagai: " + username + " (" + area + ")";
+            opSetTanggalHariIni();
+            opGantiTab('baru');
+        }
+
+        // Masuk sebagai Admin: TANPA daftar akun, langsung ke dashboard yang
+        // sama persis dipakai kurir — supaya bisa langsung lihat & coba
+        // struktur form input-nya. Bedanya: Area gak fix (bisa pilih bebas
+        // di form input), dan tab Riwayat nampilin SEMUA laporan lintas area,
+        // bukan cuma punya sendiri.
+        function masukKeDashboardAdmin(areaDipilih) {
+            OP_RUTE_LIST = [];
+            opRenderRuteChips();
+            OP_AREA_AKTIF = areaDipilih || "";
+            OP_USER_AKTIF = "Admin";
+            OP_DATA_LAPORAN = [];
+            ADMIN_LOGIN = true;
+
+            document.getElementById('op_admin_filter_wrap').style.display = 'block';
+            document.getElementById('op_gudang_admin_filter_wrap').style.display = 'block';
+            opResetTampilanRiwayat();
+            opResetTampilanGudang();
+            opSetDefaultRentangAdmin();
+            opSetDefaultRentangGudang();
+            document.getElementById('op_tab_daftar').innerText = '📋 Semua Laporan';
+
+            tampilkanLayar('dashboard_operasional');
+            document.getElementById('label_user_operasional').innerText = "Login sebagai: Admin sementara (" + (areaDipilih || 'semua area') + ")";
+            opSetTanggalHariIni();
+            opGantiTab('baru');
+        }
+
+        // Catatan: sesi ini cuma "diingat" di localStorage (sama seperti sesi
+        // modul Gudang), BUKAN token aman yang divalidasi ulang ke server.
+        // Cukup untuk kemudahan gak login berulang, tapi siapa pun yang pegang
+        // HP dalam kondisi belum logout otomatis bisa lanjut pakai sesi itu.
+        function cekSesiOperasional() {
+            try {
+                const raw = localStorage.getItem('sesi_operasional');
+                if (!raw) return;
+                const sesi = JSON.parse(raw);
+                if (sesi && sesi.area && sesi.username) {
+                    masukKeDashboardOperasional(sesi.area, sesi.username);
+                }
+            } catch (e) {}
+        }
+
+        const OP_ID_ISIAN = ['op_input_cash', 'op_input_tempo', 'op_input_revisi', 'op_input_rma', 'op_input_suratjalan',
+            'op_input_jumlahtoko', 'op_input_tokotidak', 'op_input_fakturtidak', 'op_input_nilaicashtagihan', 'op_gudang_jumlah'];
+
+        // Ada isian di form Laporan Harian / Laporan Gudang yang belum disimpan?
+        function opAdaDataBelumTersimpan() {
+            if (OP_RUTE_LIST.length > 0) return true;
+            if (document.getElementById('op_rute_input').value.trim() !== '') return true;
+            return OP_ID_ISIAN.some(id => document.getElementById(id).value.trim() !== '');
+        }
+
+        function opKosongkanForm() {
+            OP_ID_ISIAN.forEach(id => { document.getElementById(id).value = ''; });
+            document.getElementById('op_input_faktur').value = '';
+            document.getElementById('op_rute_input').value = '';
+            OP_RUTE_LIST = [];
+            opRenderRuteChips();
+        }
+
+        function logoutOperasional() {
+            const pesan = opAdaDataBelumTersimpan()
+                ? "⚠️ Ada isian yang BELUM disimpan. Kalau keluar sekarang, isiannya hilang dan harus diinput ulang.\n\nTetap keluar?"
+                : "Yakin mau keluar?";
+            if (!confirm(pesan)) return;
+            opKosongkanForm();
+            try { localStorage.removeItem('sesi_operasional'); } catch (e) {}
+            OP_AREA_AKTIF = "";
+            OP_USER_AKTIF = "";
+            OP_DATA_LAPORAN = [];
+            ADMIN_LOGIN = false;
+            tampilkanLayar('pilih_modul_overlay');
+        }
+
+        // ===================== OPERASIONAL: LAPORAN HARIAN KURIR =====================
+
+        function opGantiTab(tab) {
+            OP_TAB_AKTIF = tab;
+            document.getElementById('op_tab_baru').classList.toggle('tab-aktif', tab === 'baru');
+            document.getElementById('op_tab_gudang').classList.toggle('tab-aktif', tab === 'gudang');
+            document.getElementById('op_tab_daftar').classList.toggle('tab-aktif', tab === 'daftar');
+            document.getElementById('op_panel_baru').style.display = (tab === 'baru') ? 'block' : 'none';
+            document.getElementById('op_panel_gudang').style.display = (tab === 'gudang') ? 'block' : 'none';
+            document.getElementById('op_panel_daftar').style.display = (tab === 'daftar') ? 'block' : 'none';
+        }
+
+        function opAmbilAngka(id) {
+            const v = parseInt(document.getElementById(id).value, 10);
+            return isNaN(v) ? 0 : v;
+        }
+
+        // Total = Cash + Tempo + Revisi + RMA + Surat Jalan.
+        function opHitungTotalFaktur() {
+            const total = opAmbilAngka('op_input_cash') + opAmbilAngka('op_input_tempo')
+                + opAmbilAngka('op_input_revisi') + opAmbilAngka('op_input_rma') + opAmbilAngka('op_input_suratjalan');
+            document.getElementById('op_input_faktur').value = total;
+        }
+
+        // ===================== TANGGAL LAPORAN =====================
+
+        // Tanggal lokal perangkat dalam format YYYY-MM-DD (bukan toISOString,
+        // karena itu pakai UTC dan bisa geser sehari di jam-jam pagi WIB).
+        function opTanggalHariIni() {
+            const d = new Date();
+            const dua = n => String(n).padStart(2, '0');
+            return d.getFullYear() + '-' + dua(d.getMonth() + 1) + '-' + dua(d.getDate());
+        }
+
+        function opSetTanggalHariIni() {
+            const hariIni = opTanggalHariIni();
+            const el = document.getElementById('op_input_tanggal');
+            el.max = hariIni;   // gak boleh pilih tanggal yang belum terjadi
+            el.value = hariIni;
+
+            const elGudang = document.getElementById('op_gudang_tanggal');
+            elGudang.max = hariIni;
+            elGudang.value = hariIni;
+        }
+
+        function opFormatTanggal(str) {
+            if (!str) return '-';
+            const [y, m, d] = String(str).split('-').map(Number);
+            if (!y || !m || !d) return str;
+            return new Date(y, m - 1, d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function opFormatRupiah(angka) {
+            const n = Number(angka) || 0;
+            return 'Rp' + n.toLocaleString('id-ID');
+        }
+
+        // Format input Nilai Cash + Tagihan jadi "Rp1.234.567" sambil diketik.
+        // Titik pemisah ribuan ditambah otomatis, karakter selain angka dibuang.
+        function opFormatInputRupiah(el) {
+            const angka = el.value.replace(/\D/g, '');
+            el.value = angka ? 'Rp' + Number(angka).toLocaleString('id-ID') : '';
+        }
+
+        // Ambil angka murni dari field yang sudah diformat "Rp1.234.567".
+        function opAmbilAngkaRupiah(id) {
+            const angka = document.getElementById(id).value.replace(/\D/g, '');
+            return angka ? parseInt(angka, 10) : 0;
+        }
+
+        // ===================== INPUT RUTE (ketik manual, huruf besar, tanpa spasi) =====================
+
+        // Paksa huruf besar & buang semua karakter selain A-Z / 0-9 (spasi ikut terbuang)
+        function opBersihkanInputRute(el) {
+            const bersih = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (el.value !== bersih) el.value = bersih;
+        }
+
+        function opTambahRute() {
+            const el = document.getElementById('op_rute_input');
+            const kode = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (!kode) return;
+            if (OP_RUTE_LIST.includes(kode)) {
+                alert("Rute " + kode + " sudah ditambahkan.");
+                el.value = '';
+                return;
+            }
+            OP_RUTE_LIST.push(kode);
+            el.value = '';
+            opRenderRuteChips();
+            el.focus();
+        }
+
+        function opHapusRute(kode) {
+            OP_RUTE_LIST = OP_RUTE_LIST.filter(r => r !== kode);
+            opRenderRuteChips();
+        }
+
+        function opRenderRuteChips() {
+            document.getElementById('op_rute_chips').innerHTML = OP_RUTE_LIST.map(r =>
+                `<span style="display:inline-flex; align-items:center; gap:6px; background:#dcfce7; color:#166534; font-weight:700; font-size:14px; padding:6px 10px; border-radius:999px;">${r}<button type="button" onclick="opHapusRute('${r}')" style="background:none; border:none; color:#166534; font-size:16px; line-height:1; cursor:pointer; padding:0;">✕</button></span>`
+            ).join('');
+        }
+
+        async function opSimpanLaporan() {
+            opTambahRute(); // kalau ada kode yang sudah diketik tapi belum dipencet Tambah, ikut dimasukkan
+            opHitungTotalFaktur(); // jaga-jaga kalau ada nilai yang belum sempat memicu hitung ulang otomatis
+            const ruteTerpilih = OP_RUTE_LIST.slice();
+            const jumlahFaktur = opAmbilAngka('op_input_faktur');
+            const area = OP_AREA_AKTIF; // area ikut akun (dari daftar/login), gak dipilih lagi
+            const kurir = ADMIN_LOGIN ? "Admin" : OP_USER_AKTIF;
+            const tanggal = document.getElementById('op_input_tanggal').value;
+
+            if (!tanggal) {
+                alert("Isi tanggal laporan dulu!");
+                return;
+            }
+            if (tanggal > opTanggalHariIni()) {
+                alert("Tanggal laporan gak boleh lebih dari hari ini!");
+                return;
+            }
+            if (ruteTerpilih.length === 0) {
+                alert("Isi minimal 1 rute area (contoh: D1)!");
+                return;
+            }
+            if (jumlahFaktur <= 0) {
+                alert("Jumlah Faktur (total dibawa) wajib diisi, minimal 1!");
+                return;
+            }
+
+            const payload = {
+                action: 'simpan_laporan',
+                area: area,
+                kurir: kurir,
+                tanggal: tanggal,
+                ruteArea: ruteTerpilih.join(', '),
+                jumlahFaktur: jumlahFaktur,
+                fakturCash: opAmbilAngka('op_input_cash'),
+                fakturTempo: opAmbilAngka('op_input_tempo'),
+                fakturRevisi: opAmbilAngka('op_input_revisi'),
+                fakturRMA: opAmbilAngka('op_input_rma'),
+                suratJalan: opAmbilAngka('op_input_suratjalan'),
+                jumlahToko: opAmbilAngka('op_input_jumlahtoko'),
+                tokoTidakDikunjungi: opAmbilAngka('op_input_tokotidak'),
+                fakturTidakKirim: opAmbilAngka('op_input_fakturtidak'),
+                nilaiCashTagihan: opAmbilAngkaRupiah('op_input_nilaicashtagihan')
+            };
+
+            document.getElementById('loading_overlay').style.display = 'flex';
+            try {
+                const hasil = await panggilOpGAS(payload);
+                if (hasil.status !== 'success') {
+                    alert("Gagal menyimpan: " + (hasil.message || 'Terjadi kesalahan.'));
+                    return;
+                }
+
+                OP_RUTE_LIST = [];
+                opRenderRuteChips();
+                opSetTanggalHariIni();
+                ['op_input_faktur', 'op_input_cash', 'op_input_tempo', 'op_input_revisi', 'op_input_rma', 'op_input_suratjalan',
+                 'op_input_jumlahtoko', 'op_input_tokotidak', 'op_input_fakturtidak', 'op_input_nilaicashtagihan']
+                    .forEach(id => document.getElementById(id).value = '');
+                alert(ADMIN_LOGIN ? "Tersimpan sebagai contoh (kurir: Admin)." : "Laporan harian berhasil disimpan.");
+            } catch (e) {
+                alert("Gagal menghubungi server. Cek koneksi internet lalu coba lagi.");
+            } finally {
+                document.getElementById('loading_overlay').style.display = 'none';
+            }
+        }
+
+        // Escape teks dari database sebelum dimasukkan ke innerHTML. Username kurir
+        // diketik bebas saat daftar, jadi tanpa ini nama seperti <img onerror=...>
+        // bisa jalan di layar admin.
+        function opEsc(v) {
+            return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        // Tanggal kirim laporan; baris lama yang belum punya kolom tanggal
+        // memakai tanggal saat diinput.
+        function opTanggalLaporan(l) {
+            if (l.tanggal) return String(l.tanggal);
+            if (!l.timestamp) return '';
+            const d = new Date(l.timestamp);
+            if (isNaN(d)) return '';
+            const dua = n => String(n).padStart(2, '0');
+            return d.getFullYear() + '-' + dua(d.getMonth() + 1) + '-' + dua(d.getDate());
+        }
+
+        function opSetDefaultRentangAdmin() {
+            const hariIni = opTanggalHariIni();
+            document.getElementById('op_admin_tgl_sampai').value = hariIni;
+            document.getElementById('op_admin_tgl_dari').value = hariIni.slice(0, 8) + '01'; // awal bulan ini
+        }
+
+        // Kosongkan tampilan Semua Laporan / Riwayat setiap ganti akun (admin <-> kurir)
+        function opResetTampilanRiwayat() {
+            OP_DATA_LAPORAN = [];
+            OP_DAFTAR_KURIR = [];
+            OP_SUDAH_MUAT = false;
+            document.getElementById('op_admin_rekap').style.display = 'none';
+            document.getElementById('op_admin_charts').innerHTML = '';
+            document.getElementById('op_admin_ringkasan').innerHTML = '';
+            document.getElementById('op_admin_detail_list').innerHTML = '';
+            document.getElementById('op_daftar_list').innerHTML = '';
+            document.getElementById('op_daftar_kosong').style.display = 'block';
+            document.getElementById('op_daftar_kosong').innerText = 'Tekan "Muat / Refresh" untuk lihat data.';
+            document.getElementById('op_admin_filter_kurir').innerHTML = '<option value="">-- Semua Kurir --</option>';
+        }
+
+        async function opMuatRiwayat() {
+            document.getElementById('loading_overlay').style.display = 'flex';
+            try {
+                let hasil;
+                if (ADMIN_LOGIN) {
+                    // Data area yang dipilih waktu login + daftar kurir yang terdaftar di area itu.
+                    // Kalau daftar_kurir gagal (backend belum di-update), dropdown kurir
+                    // tetap terisi dari nama-nama yang muncul di laporan.
+                    const [h1, h2] = await Promise.all([
+                        panggilOpGAS({ action: 'muat_laporan', area: OP_AREA_AKTIF }),
+                        panggilOpGAS({ action: 'daftar_kurir', area: OP_AREA_AKTIF }).catch(() => null)
+                    ]);
+                    hasil = h1;
+                    OP_DAFTAR_KURIR = (h2 && h2.status === 'success' && Array.isArray(h2.data)) ? h2.data : [];
+                } else {
+                    hasil = await panggilOpGAS({ action: 'muat_laporan', area: OP_AREA_AKTIF, kurirFilter: OP_USER_AKTIF });
+                }
+
+                if (hasil.status !== 'success') {
+                    alert("Gagal memuat data: " + (hasil.message || 'Terjadi kesalahan.'));
+                    return;
+                }
+                OP_DATA_LAPORAN = hasil.data || [];
+                OP_DATA_LAPORAN.sort((a, b) => opTanggalLaporan(b).localeCompare(opTanggalLaporan(a)) || (new Date(b.timestamp) - new Date(a.timestamp)));
+                OP_SUDAH_MUAT = true;
+                if (ADMIN_LOGIN) opIsiDropdownKurir();
+                opRenderRiwayatTampil();
+            } catch (e) {
+                alert("Gagal menghubungi server. Cek koneksi internet lalu coba lagi.");
+            } finally {
+                document.getElementById('loading_overlay').style.display = 'none';
+            }
+        }
+
+        // Dropdown kurir = kurir yang terdaftar di area ini + nama yang muncul di laporan
+        function opIsiDropdownKurir() {
+            const sel = document.getElementById('op_admin_filter_kurir');
+            const dipilih = sel.value;
+            const nama = new Set(OP_DAFTAR_KURIR);
+            OP_DATA_LAPORAN.forEach(l => { if (l.kurir) nama.add(String(l.kurir)); });
+            const urut = Array.from(nama).sort((a, b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
+            sel.innerHTML = '';
+            sel.add(new Option('-- Semua Kurir --', '')); // Option() aman dari injeksi HTML
+            urut.forEach(n => sel.add(new Option(n, n)));
+            if (nama.has(dipilih)) sel.value = dipilih;
+        }
+
+        // Render ulang dari data yang sudah dimuat (filter tanggal/kurir tanpa fetch ulang)
+        function opRenderRiwayatTampil() {
+            if (ADMIN_LOGIN) {
+                opRenderRekapAdmin();
+                return;
+            }
+            document.getElementById('op_admin_rekap').style.display = 'none';
+            opRenderKartuLaporan(OP_DATA_LAPORAN, 'op_daftar_list', 'op_daftar_kosong', false);
+        }
+
+        // ===================== OPERASIONAL: LAPORAN GUDANG =====================
+        // Siapa pun yang login (kurir maupun Admin sementara) bisa isi laporan ini
+        // atas nama akunnya sendiri. Rekap di bawahnya: Admin lihat performa semua
+        // petugas sekaligus (bisa difilter), akun biasa cuma lihat riwayat sendiri.
+
+        async function opSimpanLaporanGudang() {
+            const area = OP_AREA_AKTIF;
+            const petugas = ADMIN_LOGIN ? "Admin" : OP_USER_AKTIF;
+            const tanggal = document.getElementById('op_gudang_tanggal').value;
+            const jumlahFaktur = opAmbilAngka('op_gudang_jumlah');
+
+            if (!tanggal) { alert("Isi tanggal laporan dulu!"); return; }
+            if (tanggal > opTanggalHariIni()) { alert("Tanggal laporan gak boleh lebih dari hari ini!"); return; }
+            if (jumlahFaktur <= 0) { alert("Jumlah faktur wajib diisi, minimal 1!"); return; }
+
+            const payload = { action: 'simpan_laporan_gudang', area, petugas, tanggal, jumlahFaktur };
+            const tombol = event ? event.target : null;
+            if (tombol) { tombol.disabled = true; tombol.innerText = 'Menyimpan...'; }
+            document.getElementById('loading_overlay').style.display = 'flex';
+            try {
+                const hasil = await panggilOpGAS(payload);
+                if (hasil.status !== 'success') {
+                    alert("Gagal menyimpan: " + (hasil.message || 'Terjadi kesalahan.'));
+                    return;
+                }
+                alert(ADMIN_LOGIN ? "Tersimpan sebagai contoh (petugas: Admin)." : "Laporan gudang berhasil disimpan.");
+                document.getElementById('op_gudang_jumlah').value = '';
+                opSetTanggalHariIni();
+            } catch (e) {
+                alert("Gagal menghubungi server. Cek koneksi internet lalu coba lagi.");
+            } finally {
+                document.getElementById('loading_overlay').style.display = 'none';
+                if (tombol) { tombol.disabled = false; tombol.innerText = 'Simpan Laporan Gudang'; }
+            }
+        }
+
+        function opSetDefaultRentangGudang() {
+            const hariIni = opTanggalHariIni();
+            document.getElementById('op_gudang_tgl_sampai').value = hariIni;
+            document.getElementById('op_gudang_tgl_dari').value = hariIni.slice(0, 8) + '01'; // awal bulan ini
+        }
+
+        function opResetTampilanGudang() {
+            OP_DATA_LAPORAN_GUDANG = [];
+            OP_SUDAH_MUAT_GUDANG = false;
+            document.getElementById('op_gudang_rekap').style.display = 'none';
+            document.getElementById('op_gudang_charts').innerHTML = '';
+            document.getElementById('op_gudang_ringkasan').innerHTML = '';
+            document.getElementById('op_gudang_detail_list').innerHTML = '';
+            document.getElementById('op_gudang_list').innerHTML = '';
+            document.getElementById('op_gudang_kosong').style.display = 'block';
+            document.getElementById('op_gudang_kosong').innerText = 'Tekan "Muat / Refresh Rekap" untuk lihat data.';
+            document.getElementById('op_gudang_filter_petugas').innerHTML = '<option value="">-- Semua Petugas --</option>';
+        }
+
+        async function opMuatRiwayatGudang() {
+            document.getElementById('loading_overlay').style.display = 'flex';
+            try {
+                let hasil;
+                if (ADMIN_LOGIN) {
+                    const [h1, h2] = await Promise.all([
+                        panggilOpGAS({ action: 'muat_laporan_gudang', area: OP_AREA_AKTIF }),
+                        panggilOpGAS({ action: 'daftar_kurir', area: OP_AREA_AKTIF }).catch(() => null)
+                    ]);
+                    hasil = h1;
+                    OP_DAFTAR_KURIR = (h2 && h2.status === 'success' && Array.isArray(h2.data)) ? h2.data : OP_DAFTAR_KURIR;
+                } else {
+                    hasil = await panggilOpGAS({ action: 'muat_laporan_gudang', area: OP_AREA_AKTIF, petugasFilter: OP_USER_AKTIF });
+                }
+
+                if (hasil.status !== 'success') {
+                    alert("Gagal memuat data: " + (hasil.message || 'Terjadi kesalahan.'));
+                    return;
+                }
+                OP_DATA_LAPORAN_GUDANG = hasil.data || [];
+                OP_DATA_LAPORAN_GUDANG.sort((a, b) => opTanggalLaporan(b).localeCompare(opTanggalLaporan(a)) || (new Date(b.timestamp) - new Date(a.timestamp)));
+                OP_SUDAH_MUAT_GUDANG = true;
+                if (ADMIN_LOGIN) opIsiDropdownPetugasGudang();
+                opRenderRekapGudang();
+            } catch (e) {
+                alert("Gagal menghubungi server. Cek koneksi internet lalu coba lagi.");
+            } finally {
+                document.getElementById('loading_overlay').style.display = 'none';
+            }
+        }
+
+        function opIsiDropdownPetugasGudang() {
+            const sel = document.getElementById('op_gudang_filter_petugas');
+            const dipilih = sel.value;
+            const nama = new Set(OP_DAFTAR_KURIR);
+            OP_DATA_LAPORAN_GUDANG.forEach(l => { if (l.petugas) nama.add(String(l.petugas)); });
+            const urut = Array.from(nama).sort((a, b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
+            sel.innerHTML = '';
+            sel.add(new Option('-- Semua Petugas --', ''));
+            urut.forEach(n => sel.add(new Option(n, n)));
+            if (nama.has(dipilih)) sel.value = dipilih;
+        }
+
+        function opRenderRekapGudang() {
+            const kosong = document.getElementById('op_gudang_kosong');
+            const rekap = document.getElementById('op_gudang_rekap');
+            document.getElementById('op_gudang_list').innerHTML = '';
+
+            if (!OP_SUDAH_MUAT_GUDANG) return;
+
+            if (!ADMIN_LOGIN) {
+                rekap.style.display = 'none';
+                if (OP_DATA_LAPORAN_GUDANG.length === 0) {
+                    kosong.style.display = 'block';
+                    kosong.innerText = 'Belum ada laporan gudang.';
+                    return;
+                }
+                kosong.style.display = 'none';
+                document.getElementById('op_gudang_list').innerHTML = OP_DATA_LAPORAN_GUDANG.map(l => `
+                    <div class="card" style="margin-bottom:10px; border-left: 4px solid #16a34a;">
+                        <div style="font-size:12px; color:#64748b;">📅 ${opEsc(opFormatTanggal(opTanggalLaporan(l)))}</div>
+                        <div style="font-weight:700; font-size:16px; margin-top:4px;">Jumlah Faktur: ${l.jumlahFaktur ?? 0}</div>
+                    </div>
+                `).join('');
+                return;
+            }
+
+            // --- Admin: filter tanggal + petugas, lalu rekap & grafik ---
+            const dari = document.getElementById('op_gudang_tgl_dari').value;
+            const sampai = document.getElementById('op_gudang_tgl_sampai').value;
+            const petugasDipilih = document.getElementById('op_gudang_filter_petugas').value;
+
+            if (dari && sampai && dari > sampai) {
+                rekap.style.display = 'none';
+                kosong.style.display = 'block';
+                kosong.innerText = 'Tanggal "Dari" tidak boleh lebih besar dari "Sampai".';
+                return;
+            }
+
+            const data = OP_DATA_LAPORAN_GUDANG.filter(l => {
+                const t = opTanggalLaporan(l);
+                if (dari && t < dari) return false;
+                if (sampai && t > sampai) return false;
+                if (petugasDipilih && String(l.petugas) !== petugasDipilih) return false;
+                return true;
+            });
+
+            if (data.length === 0) {
+                rekap.style.display = 'none';
+                kosong.style.display = 'block';
+                kosong.innerText = 'Belum ada laporan gudang untuk tanggal / petugas ini.';
+                return;
+            }
+            kosong.style.display = 'none';
+            rekap.style.display = 'block';
+
+            let totalFaktur = 0;
+            const hariSet = new Set();
+            const perPetugas = {};
+            data.forEach(l => {
+                const f = Number(l.jumlahFaktur) || 0;
+                totalFaktur += f;
+                hariSet.add(opTanggalLaporan(l));
+                const p = String(l.petugas || '-');
+                perPetugas[p] = (perPetugas[p] || 0) + f;
+            });
+
+            document.getElementById('op_gudang_ringkasan').innerHTML =
+                `<b>${data.length}</b> laporan · <b>${hariSet.size}</b> hari · <b>${Object.keys(perPetugas).length}</b> petugas`
+                + (petugasDipilih ? ` · Petugas: <b>${opEsc(petugasDipilih)}</b>` : '')
+                + `<div style="margin-top:6px; font-size:15px;">Total Faktur Dikerjakan: <b style="color:#16a34a;">${totalFaktur}</b></div>`;
+
+            const petugasList = Object.entries(perPetugas).sort((a, b) => b[1] - a[1]);
+            let html = '';
+            html += opJudulGrafik('Performa Anak Gudang — Total Faktur Dikerjakan', 'Perbandingan petugas pada rentang tanggal ini');
+            html += opBarHtml(petugasList.slice(0, 15).map(([p, n]) => ({ label: p, value: n, color: '#2563eb' })),
+                petugasList.length > 15 ? '15 petugas teratas' : '');
+            document.getElementById('op_gudang_charts').innerHTML = html;
+
+            document.getElementById('op_gudang_detail_list').innerHTML = data.map(l => `
+                <div class="card" style="margin-bottom:10px; border-left: 4px solid #16a34a;">
+                    <div style="font-size:12px; color:#64748b;">📅 ${opEsc(opFormatTanggal(opTanggalLaporan(l)))}</div>
+                    <div style="font-weight:700; font-size:16px; margin-top:4px;">Jumlah Faktur: ${l.jumlahFaktur ?? 0}</div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:8px;">Petugas: ${opEsc(l.petugas)} (${opEsc(l.area)})</div>
+                </div>
+            `).join('');
+        }
+
+        // Diagram batang horizontal murni HTML/CSS (tanpa library, tetap jalan
+        // walau file dibuka offline lewat content://).
+        function opBarHtml(items, catatan) {
+            const maks = Math.max(0, ...items.map(i => i.value));
+            const baris = items.map(i => {
+                const lebar = maks > 0 ? Math.round((i.value / maks) * 100) : 0;
+                const labelNilai = i.valueLabel !== undefined ? i.valueLabel : i.value;
+                return `
+                    <div style="display:flex; align-items:center; gap:8px; margin:6px 0;">
+                        <div style="width:82px; flex-shrink:0; font-size:12px; color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${opEsc(i.label)}">${opEsc(i.label)}</div>
+                        <div style="flex:1; background:#f1f5f9; border-radius:6px; height:22px; overflow:hidden;">
+                            <div style="width:${lebar}%; min-width:${i.value > 0 ? 3 : 0}px; height:100%; background:${i.color || '#16a34a'}; border-radius:6px;"></div>
+                        </div>
+                        <div style="width:70px; flex-shrink:0; text-align:right; font-size:11px; font-weight:700; color:#0f172a;">${labelNilai}</div>
+                    </div>`;
+            }).join('');
+            return baris + (catatan ? `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">${catatan}</div>` : '');
+        }
+
+        function opJudulGrafik(teks, sub) {
+            return `<div style="margin:18px 0 6px;"><div style="font-weight:700; font-size:14px; color:#0f172a;">${teks}</div>${sub ? `<div style="font-size:12px; color:#64748b;">${sub}</div>` : ''}</div>`;
+        }
+
+        // Sub-judul nama kurir, dipakai untuk mengelompokkan beberapa bar per kurir dalam 1 grafik.
+        function opJudulSubKurir(nama) {
+            return `<div style="font-size:12px; font-weight:700; color:#334155; margin-top:10px;">${opEsc(nama)}</div>`;
+        }
+
+        function opRenderRekapAdmin() {
+            const rekap = document.getElementById('op_admin_rekap');
+            const kosong = document.getElementById('op_daftar_kosong');
+            document.getElementById('op_daftar_list').innerHTML = '';
+
+            if (!OP_SUDAH_MUAT) return; // belum pernah dimuat: biarkan pesan "Tekan Muat / Refresh"
+
+            const dari = document.getElementById('op_admin_tgl_dari').value;
+            const sampai = document.getElementById('op_admin_tgl_sampai').value;
+            const kurirDipilih = document.getElementById('op_admin_filter_kurir').value;
+
+            if (dari && sampai && dari > sampai) {
+                rekap.style.display = 'none';
+                kosong.style.display = 'block';
+                kosong.innerText = 'Tanggal "Dari" tidak boleh lebih besar dari "Sampai".';
+                return;
+            }
+
+            const data = OP_DATA_LAPORAN.filter(l => {
+                const t = opTanggalLaporan(l);
+                if (dari && t < dari) return false;
+                if (sampai && t > sampai) return false;
+                if (kurirDipilih && String(l.kurir) !== kurirDipilih) return false;
+                return true;
+            });
+
+            if (data.length === 0) {
+                rekap.style.display = 'none';
+                kosong.style.display = 'block';
+                kosong.innerText = 'Belum ada laporan untuk tanggal / kurir ini.';
+                return;
+            }
+            kosong.style.display = 'none';
+            rekap.style.display = 'block';
+
+            // --- hitung ---
+            const total = { faktur: 0, cash: 0, tempo: 0, revisi: 0, rma: 0, suratJalan: 0, fakturTidak: 0, toko: 0, tokoTidak: 0, nilaiCashTagihan: 0 };
+            const hariSet = new Set();
+            const perKurir = {};
+            const perRute = {};
+
+            data.forEach(l => {
+                const f = Number(l.jumlahFaktur) || 0;
+                total.faktur += f;
+                total.cash += Number(l.fakturCash) || 0;
+                total.tempo += Number(l.fakturTempo) || 0;
+                total.revisi += Number(l.fakturRevisi) || 0;
+                total.rma += Number(l.fakturRMA) || 0;
+                total.suratJalan += Number(l.suratJalan) || 0;
+                total.fakturTidak += Number(l.fakturTidakKirim) || 0;
+                total.toko += Number(l.jumlahToko) || 0;
+                total.tokoTidak += Number(l.tokoTidakDikunjungi) || 0;
+                total.nilaiCashTagihan += Number(l.nilaiCashTagihan) || 0;
+                hariSet.add(opTanggalLaporan(l));
+
+                const k = String(l.kurir || '-');
+                if (!perKurir[k]) perKurir[k] = { faktur: 0, toko: 0, tokoTidak: 0, fakturTidak: 0, nilaiCashTagihan: 0 };
+                perKurir[k].faktur += f;
+                perKurir[k].toko += Number(l.jumlahToko) || 0;
+                perKurir[k].tokoTidak += Number(l.tokoTidakDikunjungi) || 0;
+                perKurir[k].fakturTidak += Number(l.fakturTidakKirim) || 0;
+                perKurir[k].nilaiCashTagihan += Number(l.nilaiCashTagihan) || 0;
+
+                // 1 laporan yang memuat rute X dihitung 1 kali (walau rute sama diketik dobel)
+                new Set(String(l.ruteArea || '').split(',').map(r => r.trim()).filter(Boolean))
+                    .forEach(r => { perRute[r] = (perRute[r] || 0) + 1; });
+            });
+
+            const jumlahKurir = Object.keys(perKurir).length;
+            document.getElementById('op_admin_ringkasan').innerHTML =
+                `<b>${data.length}</b> laporan · <b>${hariSet.size}</b> hari · <b>${jumlahKurir}</b> kurir`
+                + (kurirDipilih ? ` · Kurir: <b>${opEsc(kurirDipilih)}</b>` : '')
+                + `<div style="margin-top:6px; font-size:15px;">Total Nilai Cash + Tagihan: <b style="color:#16a34a;">${opFormatRupiah(total.nilaiCashTagihan)}</b></div>`;
+
+            // --- grafik ---
+            let html = '';
+
+            html += opJudulGrafik('Jumlah faktur per jenis', 'Total dari semua laporan pada rentang tanggal ini');
+            html += opBarHtml([
+                { label: 'Total Faktur', value: total.faktur, color: '#2563eb' },
+                { label: 'Cash', value: total.cash, color: '#16a34a' },
+                { label: 'Tempo', value: total.tempo, color: '#f59e0b' },
+                { label: 'Revisi', value: total.revisi, color: '#8b5cf6' },
+                { label: 'RMA', value: total.rma, color: '#dc2626' },
+                { label: 'Surat Jalan', value: total.suratJalan, color: '#0891b2' },
+                { label: 'Tidak Dikirim', value: total.fakturTidak, color: '#dc2626' }
+            ]);
+
+            html += opJudulGrafik('Kunjungan toko', 'Total dari semua laporan pada rentang tanggal ini');
+            html += opBarHtml([
+                { label: 'Toko Dikunjungi', value: total.toko, color: '#16a34a' },
+                { label: 'Tidak Dikunjungi', value: total.tokoTidak, color: '#dc2626' }
+            ]);
+
+            const rute = Object.entries(perRute).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 10);
+            html += opJudulGrafik('Rute yang paling sering dikunjungi', 'Berapa kali rute itu muncul di laporan' + (Object.keys(perRute).length > 10 ? ' (10 teratas)' : ''));
+            html += opBarHtml(rute.map(([r, n]) => ({ label: r, value: n, color: '#16a34a' })));
+
+            const kurirList = Object.entries(perKurir).sort((a, b) => b[1].faktur - a[1].faktur);
+            if (!kurirDipilih && kurirList.length > 1) {
+                const batasKurir = kurirList.length > 15 ? '15 kurir teratas' : '';
+
+                html += opJudulGrafik('Performa Kurir — Total Faktur', 'Perbandingan kurir pada rentang tanggal ini');
+                html += opBarHtml(kurirList.slice(0, 15).map(([k, v]) => ({ label: k, value: v.faktur, color: '#2563eb' })), batasKurir);
+
+                html += opJudulGrafik('Performa Kurir — Toko Dikunjungi vs Tidak', 'Semakin banyak toko tidak dikunjungi, semakin perlu dicek');
+                const kurirToko = [...kurirList].sort((a, b) => b[1].tokoTidak - a[1].tokoTidak || b[1].toko - a[1].toko).slice(0, 15);
+                html += kurirToko.map(([k, v]) => opJudulSubKurir(k) + opBarHtml([
+                    { label: 'Dikunjungi', value: v.toko, color: '#16a34a' },
+                    { label: 'Tidak', value: v.tokoTidak, color: '#dc2626' }
+                ])).join('') + (batasKurir ? `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">${batasKurir}</div>` : '');
+
+                html += opJudulGrafik('Performa Kurir — Faktur Tidak Dikirim', 'Makin kecil makin baik');
+                const kurirTidakKirim = [...kurirList].sort((a, b) => b[1].fakturTidak - a[1].fakturTidak).slice(0, 15);
+                html += opBarHtml(kurirTidakKirim.map(([k, v]) => ({ label: k, value: v.fakturTidak, color: '#dc2626' })), batasKurir);
+
+                html += opJudulGrafik('Performa Kurir — Nilai Cash + Tagihan', 'Total nilai (Rp) yang dibawa tiap kurir');
+                const kurirNilai = [...kurirList].sort((a, b) => b[1].nilaiCashTagihan - a[1].nilaiCashTagihan).slice(0, 15);
+                html += opBarHtml(kurirNilai.map(([k, v]) => ({ label: k, value: v.nilaiCashTagihan, valueLabel: opFormatRupiah(v.nilaiCashTagihan), color: '#16a34a' })), batasKurir);
+            }
+
+            document.getElementById('op_admin_charts').innerHTML = html;
+
+            // --- detail laporan (dilipat) ---
+            opRenderKartuLaporan(data, 'op_admin_detail_list', 'op_admin_detail_kosong', true);
+        }
+
+        // dipakai bareng oleh Riwayat Saya (kurir) & Dashboard Admin
+        function opRenderKartuLaporan(data, idList, idKosong, tampilkanKurir) {
+            const list = document.getElementById(idList);
+            const kosong = document.getElementById(idKosong);
+
+            if (!data || data.length === 0) {
+                list.innerHTML = '';
+                kosong.style.display = 'block';
+                kosong.innerText = 'Belum ada data laporan.';
+                return;
+            }
+            kosong.style.display = 'none';
+
+            list.innerHTML = data.map(l => {
+                const waktu = l.timestamp ? new Date(l.timestamp).toLocaleString('id-ID') : '-';
+                const labelKurir = tampilkanKurir ? `<div style="font-size:11px; color:#94a3b8; margin-top:8px;">Kurir: ${opEsc(l.kurir)} (${opEsc(l.area)}) · diinput ${waktu}</div>` : `<div style="font-size:11px; color:#94a3b8; margin-top:8px;">Diinput ${waktu}</div>`;
+                return `
+                    <div class="card" style="margin-bottom:10px; border-left: 4px solid #16a34a;">
+                        <div style="font-size:12px; color:#64748b;">📅 ${opEsc(opFormatTanggal(opTanggalLaporan(l)))}</div>
+                        <div style="font-weight:700; font-size:14px;">Rute: ${opEsc(l.ruteArea || '-')}</div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px 12px; font-size:13px; margin-top:8px;">
+                            <div>Jumlah Faktur: <b>${l.jumlahFaktur ?? 0}</b></div>
+                            <div>Cash: <b>${l.fakturCash ?? 0}</b></div>
+                            <div>Tempo: <b>${l.fakturTempo ?? 0}</b></div>
+                            <div>Revisi: <b>${l.fakturRevisi ?? 0}</b></div>
+                            <div>RMA: <b>${l.fakturRMA ?? 0}</b></div>
+                            <div>Surat Jalan: <b>${l.suratJalan ?? 0}</b></div>
+                            <div>Faktur Tidak Dikirim: <b style="${(l.fakturTidakKirim ?? 0) > 0 ? 'color:#dc2626;' : ''}">${l.fakturTidakKirim ?? 0}</b></div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px 12px; font-size:13px; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
+                            <div>Toko Dikunjungi: <b>${l.jumlahToko ?? 0}</b></div>
+                            <div>Toko Tidak Dikunjungi: <b style="${(l.tokoTidakDikunjungi ?? 0) > 0 ? 'color:#dc2626;' : ''}">${l.tokoTidakDikunjungi ?? 0}</b></div>
+                        </div>
+                        <div style="font-size:13px; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">Nilai Cash + Tagihan: <b>${opFormatRupiah(l.nilaiCashTagihan)}</b></div>
+                        ${labelKurir}
+                    </div>
+                `;
+            }).join('');
+        }
+
         function prosesLogin(otomatis) {
             const cabang = otomatis || document.getElementById('select_cabang').value;
             const password = otomatis ? PASWORD_CABANG[otomatis] : document.getElementById('input_password').value.trim();
@@ -708,6 +1913,7 @@
             if (cabang && PASWORD_CABANG[cabang] === password) {
                 KOTA_AKTIF = cabang;
                 document.getElementById('label_kota_aktif').innerText = "Cabang: " + KOTA_AKTIF;
+                document.getElementById('pilih_modul_overlay').style.display = 'none';
                 document.getElementById('login_modal').style.display = 'none';
                 document.getElementById('app_container').style.display = 'block';
                 errorDiv.style.display = 'none';
@@ -799,7 +2005,8 @@
             document.getElementById('select_cabang').value = '';
             document.getElementById('peringatan_auto_login').style.display = 'none';
             document.getElementById('app_container').style.display = 'none';
-            document.getElementById('login_modal').style.display = 'flex';
+            document.getElementById('login_modal').style.display = 'none';
+            document.getElementById('pilih_modul_overlay').style.display = 'flex';
         }
 
         function cekSesiTersimpan() {
@@ -1515,6 +2722,7 @@
 
         window.onload = function() {
             cekSesiTersimpan();
+            cekSesiOperasional();
         };
     </script>
 </body>
