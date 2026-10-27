@@ -575,23 +575,55 @@
             </div>
 
             <div class="form-group">
-                <label for="op_rute_input">Rute Area Hari Ini * <span style="font-weight:400; color:#64748b;">(ketik kode rute, contoh: D1, BKS1)</span></label>
-                <div style="display:flex; gap:8px;">
-                    <input type="text" id="op_rute_input" placeholder="Ketik kode rute..." autocapitalize="characters" autocomplete="off" maxlength="12"
-                        style="flex:1; text-transform:uppercase;"
-                        oninput="opBersihkanInputRute(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();opTambahRute();}">
-                    <button type="button" class="btn btn-primary" style="width:auto; padding:0 18px; background:#16a34a;" onclick="opTambahRute()">+ Tambah</button>
-                </div>
-                <div style="font-size:12px; color:#64748b; margin-top:6px;">Huruf besar & angka saja, tanpa spasi. Tambah lebih dari 1 rute kalau hari ini jalan ke beberapa rute.</div>
-                <div id="op_rute_chips" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
+                <label>Rute Area Hari Ini * <span style="font-weight:400; color:#64748b;">(tap untuk pilih, bisa lebih dari 1)</span></label>
+                <div id="op_rute_picker"></div>
+                <div style="font-size:12px; color:#64748b; margin-top:10px;">Dipilih:</div>
+                <div id="op_rute_chips" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;"></div>
             </div>
             <div class="form-group">
                 <label for="op_input_jumlahtoko">Jumlah Toko Dikunjungi</label>
                 <input type="number" id="op_input_jumlahtoko" min="0" placeholder="0">
             </div>
             <div class="form-group">
-                <label for="op_input_tokotidak">Toko Tidak Dikunjungi</label>
-                <input type="number" id="op_input_tokotidak" min="0" placeholder="0">
+                <label>Toko Tidak Sampai <span style="font-weight:400; color:#64748b;">(ceklis alasannya, lalu isi jumlah tokonya)</span></label>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+                    <label style="display:flex; align-items:center; gap:8px; flex:1; margin:0; font-weight:600;">
+                        <input type="checkbox" id="op_cek_tutup" style="width:22px; height:22px;" onchange="opToggleAlasanToko()"> Tutup
+                    </label>
+                    <input type="number" id="op_input_tokotutup" min="0" placeholder="Jml toko" disabled style="width:120px;" oninput="opHitungTokoTidakSampai()">
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+                    <label style="display:flex; align-items:center; gap:8px; flex:1; margin:0; font-weight:600;">
+                        <input type="checkbox" id="op_cek_pergi" style="width:22px; height:22px;" onchange="opToggleAlasanToko()"> Tanpa alasan / pergi
+                    </label>
+                    <input type="number" id="op_input_tokopergi" min="0" placeholder="Jml toko" disabled style="width:120px;" oninput="opHitungTokoTidakSampai()">
+                </div>
+                <div id="op_info_toko_tidak" style="font-size:12px; color:#64748b; margin-top:8px;">Total toko tidak sampai: <b>0</b></div>
+            </div>
+            <div class="form-group">
+                <label for="op_input_overtrack_sedang">Over Track Sedang</label>
+                <input type="number" id="op_input_overtrack_sedang" min="0" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="op_input_overtrack_jauh">Over Track Jauh</label>
+                <input type="number" id="op_input_overtrack_jauh" min="0" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="op_input_point_antaran">Point Antaran</label>
+                <input type="number" id="op_input_point_antaran" min="0" step="any" inputmode="decimal" placeholder="0" oninput="opHitungPoint()">
+            </div>
+            <div class="form-group">
+                <label for="op_input_point_tagihan">Point Tagihan</label>
+                <input type="number" id="op_input_point_tagihan" min="0" step="any" inputmode="decimal" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="op_input_point_tambahan">Point Tambahan</label>
+                <input type="number" id="op_input_point_tambahan" min="0" step="any" inputmode="decimal" placeholder="0" oninput="opHitungPoint()">
+            </div>
+            <div class="form-group">
+                <label for="op_input_point_total">Point Antaran + Tambahan</label>
+                <input type="text" id="op_input_point_total" placeholder="0" readonly style="background:#f1f5f9; font-weight:700; color:#0f172a;">
+                <div style="font-size:12px; color:#64748b; margin-top:6px;">Otomatis = Point Antaran + Point Tambahan.</div>
             </div>
             <div class="form-group">
                 <label for="op_input_cash">Jumlah Faktur Cash</label>
@@ -681,6 +713,12 @@
             <div id="op_admin_filter_wrap" style="display:none;">
                 <div class="form-group">
                     <label>Rentang Tanggal</label>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                        <button type="button" class="tab-btn" style="flex:1 1 45%; padding:8px 4px; font-size:12px;" onclick="opSetPeriode('minggu_ini')">Minggu Ini</button>
+                        <button type="button" class="tab-btn" style="flex:1 1 45%; padding:8px 4px; font-size:12px;" onclick="opSetPeriode('minggu_lalu')">Minggu Lalu</button>
+                        <button type="button" class="tab-btn" style="flex:1 1 45%; padding:8px 4px; font-size:12px;" onclick="opSetPeriode('bulan_ini')">Bulan Ini</button>
+                        <button type="button" class="tab-btn" style="flex:1 1 45%; padding:8px 4px; font-size:12px;" onclick="opSetPeriode('bulan_lalu')">Bulan Lalu</button>
+                    </div>
                     <div style="display:flex; gap:8px; align-items:center;">
                         <input type="date" id="op_admin_tgl_dari" onchange="opRenderRiwayatTampil()" style="flex:1; min-width:0;">
                         <span style="color:#64748b; font-size:13px;">s/d</span>
@@ -698,6 +736,10 @@
             <div id="op_daftar_kosong" style="text-align:center; color:#64748b; padding:16px 0;">Tekan "Muat / Refresh" untuk lihat data.</div>
 
             <div id="op_admin_rekap" style="display:none;">
+                <div style="display:flex; gap:8px; margin-bottom:12px;">
+                    <button type="button" class="btn" style="flex:1; background:#16a34a; color:#fff; padding:10px 4px; font-size:13px;" onclick="opExportExcel()">📊 Export Excel</button>
+                    <button type="button" class="btn" style="flex:1; background:#dc2626; color:#fff; padding:10px 4px; font-size:13px;" onclick="opExportPDF()">📄 Export PDF</button>
+                </div>
                 <div id="op_admin_ringkasan" style="font-size:13px; color:#334155; margin-bottom:12px;"></div>
                 <div id="op_admin_charts"></div>
                 <details style="margin-top:16px;">
@@ -894,7 +936,7 @@
 
         // URL Web App KHUSUS modul Operasional (deploy Code_Operasional.gs
         // di spreadsheet TERPISAH, lalu tempel URL-nya di sini).
-        const OP_GAS_URL = "https://script.google.com/macros/s/AKfycbxpjvq1c8GgkmX1fi2dcCGpCrlr8y2eRHtPaL0dcPUmaA6nBPiyk8w08C3X42qDrKqSew/exec";
+        const OP_GAS_URL = "https://script.google.com/macros/s/AKfycby_TjzN1922Uih31gdd2kXctVkT6Sxgy_DdugiLTR0D4FFRu4GtEib3b01m84y0KfwIGg/exec";
 
         // PASSWORD PER CABANG
         const PASWORD_CABANG = {
@@ -1033,6 +1075,7 @@
         let OP_TAB_AKTIF = "baru";
         let ADMIN_LOGIN = false;
         let OP_RUTE_LIST = [];
+        let OP_RUTE_FAKTUR = {};   // { 'B1': 5, 'D1': 3 } = jumlah faktur per rute
         let OP_DAFTAR_KURIR = [];
         let OP_SUDAH_MUAT = false;
         let OP_DATA_LAPORAN_GUDANG = [];
@@ -1175,11 +1218,13 @@
             OP_DATA_LAPORAN = [];
             ADMIN_LOGIN = false;
 
-            document.getElementById('op_admin_filter_wrap').style.display = 'none';
-            document.getElementById('op_gudang_admin_filter_wrap').style.display = 'none';
+            document.getElementById('op_admin_filter_wrap').style.display = 'block'; // rekap kurir terbuka untuk semua akun di area ini
+            document.getElementById('op_gudang_admin_filter_wrap').style.display = 'block'; // rekap gudang terbuka untuk semua akun
             opResetTampilanRiwayat();
             opResetTampilanGudang();
-            document.getElementById('op_tab_daftar').innerText = '📋 Riwayat Saya';
+            opSetDefaultRentangAdmin();
+            opSetDefaultRentangGudang();
+            document.getElementById('op_tab_daftar').innerText = '📋 Rekap Laporan';
 
             tampilkanLayar('dashboard_operasional');
             document.getElementById('label_user_operasional').innerText = "Login sebagai: " + username + " (" + area + ")";
@@ -1230,19 +1275,58 @@
         }
 
         const OP_ID_ISIAN = ['op_input_cash', 'op_input_tempo', 'op_input_revisi', 'op_input_rma', 'op_input_suratjalan',
-            'op_input_jumlahtoko', 'op_input_tokotidak', 'op_input_fakturtidak', 'op_input_nilaicashtagihan', 'op_gudang_jumlah'];
+            'op_input_jumlahtoko', 'op_input_tokotutup', 'op_input_tokopergi', 'op_input_fakturtidak', 'op_input_nilaicashtagihan',
+            'op_input_overtrack_sedang', 'op_input_overtrack_jauh', 'op_input_point_antaran', 'op_input_point_tagihan',
+            'op_input_point_tambahan', 'op_gudang_jumlah'];
 
         // Ada isian di form Laporan Harian / Laporan Gudang yang belum disimpan?
         function opAdaDataBelumTersimpan() {
             if (OP_RUTE_LIST.length > 0) return true;
-            if (document.getElementById('op_rute_input').value.trim() !== '') return true;
+            if (document.getElementById('op_cek_tutup').checked || document.getElementById('op_cek_pergi').checked) return true;
             return OP_ID_ISIAN.some(id => document.getElementById(id).value.trim() !== '');
+        }
+
+        function opAmbilDesimal(id) {
+            const v = parseFloat(document.getElementById(id).value);
+            return isNaN(v) || v < 0 ? 0 : Math.round(v * 100) / 100;
+        }
+
+        function opHitungPoint() {
+            const t = Math.round((opAmbilDesimal('op_input_point_antaran') + opAmbilDesimal('op_input_point_tambahan')) * 100) / 100;
+            document.getElementById('op_input_point_total').value = t > 0 ? String(t) : '';
+        }
+
+        // Ceklis alasan toko tidak sampai: kolom jumlah hanya aktif kalau dicentang.
+        function opToggleAlasanToko() {
+            [['op_cek_tutup', 'op_input_tokotutup'], ['op_cek_pergi', 'op_input_tokopergi']].forEach(([cek, inp]) => {
+                const el = document.getElementById(inp);
+                const on = document.getElementById(cek).checked;
+                el.disabled = !on;
+                if (!on) el.value = '';
+                else if (el.value === '') { el.value = '1'; el.focus(); el.select(); }
+            });
+            opHitungTokoTidakSampai();
+        }
+
+        function opAmbilTokoAlasan() {
+            return {
+                tutup: document.getElementById('op_cek_tutup').checked ? opAmbilAngka('op_input_tokotutup') : 0,
+                pergi: document.getElementById('op_cek_pergi').checked ? opAmbilAngka('op_input_tokopergi') : 0
+            };
+        }
+
+        function opHitungTokoTidakSampai() {
+            const a = opAmbilTokoAlasan();
+            document.getElementById('op_info_toko_tidak').innerHTML = 'Total toko tidak sampai: <b>' + (a.tutup + a.pergi) + '</b>';
         }
 
         function opKosongkanForm() {
             OP_ID_ISIAN.forEach(id => { document.getElementById(id).value = ''; });
             document.getElementById('op_input_faktur').value = '';
-            document.getElementById('op_rute_input').value = '';
+            document.getElementById('op_input_point_total').value = '';
+            document.getElementById('op_cek_tutup').checked = false;
+            document.getElementById('op_cek_pergi').checked = false;
+            opToggleAlasanToko();
             OP_RUTE_LIST = [];
             opRenderRuteChips();
         }
@@ -1283,6 +1367,7 @@
             const total = opAmbilAngka('op_input_cash') + opAmbilAngka('op_input_tempo')
                 + opAmbilAngka('op_input_revisi') + opAmbilAngka('op_input_rma') + opAmbilAngka('op_input_suratjalan');
             document.getElementById('op_input_faktur').value = total;
+            if (typeof opUpdateTotalRute === 'function') opUpdateTotalRute();
         }
 
         // ===================== TANGGAL LAPORAN =====================
@@ -1334,24 +1419,23 @@
         // ===================== INPUT RUTE (ketik manual, huruf besar, tanpa spasi) =====================
 
         // Paksa huruf besar & buang semua karakter selain A-Z / 0-9 (spasi ikut terbuang)
-        function opBersihkanInputRute(el) {
-            const bersih = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            if (el.value !== bersih) el.value = bersih;
-        }
+        // Daftar rute tetap, dikelompokkan per ARAH. Mau tambah/ubah rute: edit daftar ini saja.
+        const OP_RUTE_ARAH = [
+            { arah: 'P',   rute: ['P1', 'P2', 'P3'] },
+            { arah: 'B',   rute: ['B1', 'B2', 'B3'] },
+            { arah: 'T',   rute: ['T1', 'T2', 'T3', 'T4'] },
+            { arah: 'S',   rute: ['S1', 'S2', 'S3', 'S4'] },
+            { arah: 'D',   rute: ['D1', 'D2', 'D3'] },
+            { arah: 'BKS', rute: ['BKS1', 'BKS2', 'BKS3', 'BKS4', 'BKS5', 'BKS6', 'BKS7', 'BKS8'] },
+            { arah: 'TGR', rute: ['TGR'] },
+            { arah: 'KRW', rute: ['KRW'] },
+            { arah: 'LK',  rute: ['LK'] }
+        ];
 
-        function opTambahRute() {
-            const el = document.getElementById('op_rute_input');
-            const kode = el.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            if (!kode) return;
-            if (OP_RUTE_LIST.includes(kode)) {
-                alert("Rute " + kode + " sudah ditambahkan.");
-                el.value = '';
-                return;
-            }
-            OP_RUTE_LIST.push(kode);
-            el.value = '';
+        function opToggleRute(kode) {
+            if (OP_RUTE_LIST.includes(kode)) OP_RUTE_LIST = OP_RUTE_LIST.filter(r => r !== kode);
+            else OP_RUTE_LIST.push(kode);
             opRenderRuteChips();
-            el.focus();
         }
 
         function opHapusRute(kode) {
@@ -1360,13 +1444,52 @@
         }
 
         function opRenderRuteChips() {
-            document.getElementById('op_rute_chips').innerHTML = OP_RUTE_LIST.map(r =>
-                `<span style="display:inline-flex; align-items:center; gap:6px; background:#dcfce7; color:#166534; font-weight:700; font-size:14px; padding:6px 10px; border-radius:999px;">${r}<button type="button" onclick="opHapusRute('${r}')" style="background:none; border:none; color:#166534; font-size:16px; line-height:1; cursor:pointer; padding:0;">✕</button></span>`
-            ).join('');
+            // Pilihan per arah (tombol hijau penuh = terpilih)
+            document.getElementById('op_rute_picker').innerHTML = OP_RUTE_ARAH.map(g => `
+                <div style="display:flex; align-items:flex-start; gap:10px; margin-top:8px;">
+                    <div style="width:42px; flex-shrink:0; padding-top:8px; font-size:12px; font-weight:700; color:#64748b;">${g.arah}</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                        ${g.rute.map(r => {
+                            const aktif = OP_RUTE_LIST.includes(r);
+                            return `<button type="button" onclick="opToggleRute('${r}')" style="min-width:48px; padding:8px 12px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; border:1.5px solid #16a34a; background:${aktif ? '#16a34a' : '#fff'}; color:${aktif ? '#fff' : '#166534'};">${r}</button>`;
+                        }).join('')}
+                    </div>
+                </div>`).join('');
+
+            // Buang jumlah milik rute yang sudah tidak dipilih
+            Object.keys(OP_RUTE_FAKTUR).forEach(k => { if (!OP_RUTE_LIST.includes(k)) delete OP_RUTE_FAKTUR[k]; });
+
+            // Baris per rute terpilih: kode + kolom jumlah faktur + hapus
+            document.getElementById('op_rute_chips').innerHTML = OP_RUTE_LIST.length === 0
+                ? '<span style="font-size:13px; color:#94a3b8;">Belum ada rute dipilih</span>'
+                : OP_RUTE_LIST.map(r => `
+                    <div style="display:flex; align-items:center; gap:8px; width:100%;">
+                        <span style="width:64px; flex-shrink:0; background:#dcfce7; color:#166534; font-weight:700; font-size:14px; padding:8px 10px; border-radius:8px; text-align:center;">${r}</span>
+                        <input type="number" inputmode="numeric" min="0" id="op_rf_${r}" placeholder="Jumlah faktur" value="${OP_RUTE_FAKTUR[r] ?? ''}" oninput="opSetFakturRute('${r}', this.value)" style="flex:1; min-width:0;">
+                        <button type="button" onclick="opHapusRute('${r}')" style="background:none; border:none; color:#166534; font-size:20px; line-height:1; cursor:pointer; padding:4px 8px;">✕</button>
+                    </div>`).join('')
+                + '<div id="op_rute_total" style="font-size:12px; margin-top:2px;"></div>';
+            opUpdateTotalRute();
+        }
+
+        function opSetFakturRute(kode, nilai) {
+            const n = parseInt(nilai, 10);
+            if (isNaN(n) || n < 0) delete OP_RUTE_FAKTUR[kode]; else OP_RUTE_FAKTUR[kode] = n;
+            opUpdateTotalRute();
+        }
+
+        // Info saja (gak memblokir): total faktur semua rute vs "Jumlah Faktur (total dibawa)".
+        function opUpdateTotalRute() {
+            const el = document.getElementById('op_rute_total');
+            if (!el) return;
+            const totalRute = OP_RUTE_LIST.reduce((a, r) => a + (OP_RUTE_FAKTUR[r] || 0), 0);
+            const totalBawa = opAmbilAngka('op_input_faktur');
+            const beda = totalBawa > 0 && totalRute !== totalBawa;
+            el.style.color = beda ? '#b45309' : '#64748b';
+            el.innerText = 'Total faktur semua rute: ' + totalRute + (beda ? ' (beda dari Jumlah Faktur total dibawa: ' + totalBawa + ', cek lagi)' : '');
         }
 
         async function opSimpanLaporan() {
-            opTambahRute(); // kalau ada kode yang sudah diketik tapi belum dipencet Tambah, ikut dimasukkan
             opHitungTotalFaktur(); // jaga-jaga kalau ada nilai yang belum sempat memicu hitung ulang otomatis
             const ruteTerpilih = OP_RUTE_LIST.slice();
             const jumlahFaktur = opAmbilAngka('op_input_faktur');
@@ -1383,7 +1506,12 @@
                 return;
             }
             if (ruteTerpilih.length === 0) {
-                alert("Isi minimal 1 rute area (contoh: D1)!");
+                alert("Pilih minimal 1 rute area dulu!");
+                return;
+            }
+            const rutePolos = ruteTerpilih.filter(r => !(OP_RUTE_FAKTUR[r] > 0));
+            if (rutePolos.length > 0) {
+                alert("Isi jumlah faktur untuk rute: " + rutePolos.join(', ') + " (minimal 1).");
                 return;
             }
             if (jumlahFaktur <= 0) {
@@ -1397,6 +1525,7 @@
                 kurir: kurir,
                 tanggal: tanggal,
                 ruteArea: ruteTerpilih.join(', '),
+                ruteFaktur: ruteTerpilih.map(r => r + ':' + OP_RUTE_FAKTUR[r]).join(', '),
                 jumlahFaktur: jumlahFaktur,
                 fakturCash: opAmbilAngka('op_input_cash'),
                 fakturTempo: opAmbilAngka('op_input_tempo'),
@@ -1404,7 +1533,13 @@
                 fakturRMA: opAmbilAngka('op_input_rma'),
                 suratJalan: opAmbilAngka('op_input_suratjalan'),
                 jumlahToko: opAmbilAngka('op_input_jumlahtoko'),
-                tokoTidakDikunjungi: opAmbilAngka('op_input_tokotidak'),
+                tokoTutup: opAmbilTokoAlasan().tutup,
+                tokoTanpaAlasan: opAmbilTokoAlasan().pergi,
+                overTrackSedang: opAmbilAngka('op_input_overtrack_sedang'),
+                overTrackJauh: opAmbilAngka('op_input_overtrack_jauh'),
+                pointAntaran: opAmbilDesimal('op_input_point_antaran'),
+                pointTagihan: opAmbilDesimal('op_input_point_tagihan'),
+                pointTambahan: opAmbilDesimal('op_input_point_tambahan'),
                 fakturTidakKirim: opAmbilAngka('op_input_fakturtidak'),
                 nilaiCashTagihan: opAmbilAngkaRupiah('op_input_nilaicashtagihan')
             };
@@ -1418,17 +1553,25 @@
                 }
 
                 OP_RUTE_LIST = [];
+                OP_RUTE_FAKTUR = {};
                 opRenderRuteChips();
                 opSetTanggalHariIni();
-                ['op_input_faktur', 'op_input_cash', 'op_input_tempo', 'op_input_revisi', 'op_input_rma', 'op_input_suratjalan',
-                 'op_input_jumlahtoko', 'op_input_tokotidak', 'op_input_fakturtidak', 'op_input_nilaicashtagihan']
-                    .forEach(id => document.getElementById(id).value = '');
+                opKosongkanFormSetelahSimpan();
                 alert(ADMIN_LOGIN ? "Tersimpan sebagai contoh (kurir: Admin)." : "Laporan harian berhasil disimpan.");
             } catch (e) {
                 alert("Gagal menghubungi server. Cek koneksi internet lalu coba lagi.");
             } finally {
                 document.getElementById('loading_overlay').style.display = 'none';
             }
+        }
+
+        function opKosongkanFormSetelahSimpan() {
+            OP_ID_ISIAN.filter(id => id !== 'op_gudang_jumlah').forEach(id => { document.getElementById(id).value = ''; });
+            document.getElementById('op_input_faktur').value = '';
+            document.getElementById('op_input_point_total').value = '';
+            document.getElementById('op_cek_tutup').checked = false;
+            document.getElementById('op_cek_pergi').checked = false;
+            opToggleAlasanToko();
         }
 
         // Escape teks dari database sebelum dimasukkan ke innerHTML. Username kurir
@@ -1473,20 +1616,14 @@
         async function opMuatRiwayat() {
             document.getElementById('loading_overlay').style.display = 'flex';
             try {
-                let hasil;
-                if (ADMIN_LOGIN) {
-                    // Data area yang dipilih waktu login + daftar kurir yang terdaftar di area itu.
-                    // Kalau daftar_kurir gagal (backend belum di-update), dropdown kurir
-                    // tetap terisi dari nama-nama yang muncul di laporan.
-                    const [h1, h2] = await Promise.all([
-                        panggilOpGAS({ action: 'muat_laporan', area: OP_AREA_AKTIF }),
-                        panggilOpGAS({ action: 'daftar_kurir', area: OP_AREA_AKTIF }).catch(() => null)
-                    ]);
-                    hasil = h1;
-                    OP_DAFTAR_KURIR = (h2 && h2.status === 'success' && Array.isArray(h2.data)) ? h2.data : [];
-                } else {
-                    hasil = await panggilOpGAS({ action: 'muat_laporan', area: OP_AREA_AKTIF, kurirFilter: OP_USER_AKTIF });
-                }
+                // Semua akun melihat laporan SEMUA kurir di areanya (bukan cuma punya sendiri),
+                // plus daftar kurir terdaftar. Kalau daftar_kurir gagal (backend belum
+                // di-update), dropdown kurir tetap terisi dari nama di laporan.
+                const [hasil, h2] = await Promise.all([
+                    panggilOpGAS({ action: 'muat_laporan', area: OP_AREA_AKTIF }),
+                    panggilOpGAS({ action: 'daftar_kurir', area: OP_AREA_AKTIF }).catch(() => null)
+                ]);
+                OP_DAFTAR_KURIR = (h2 && h2.status === 'success' && Array.isArray(h2.data)) ? h2.data : [];
 
                 if (hasil.status !== 'success') {
                     alert("Gagal memuat data: " + (hasil.message || 'Terjadi kesalahan.'));
@@ -1495,7 +1632,7 @@
                 OP_DATA_LAPORAN = hasil.data || [];
                 OP_DATA_LAPORAN.sort((a, b) => opTanggalLaporan(b).localeCompare(opTanggalLaporan(a)) || (new Date(b.timestamp) - new Date(a.timestamp)));
                 OP_SUDAH_MUAT = true;
-                if (ADMIN_LOGIN) opIsiDropdownKurir();
+                opIsiDropdownKurir();
                 opRenderRiwayatTampil();
             } catch (e) {
                 alert("Gagal menghubungi server. Cek koneksi internet lalu coba lagi.");
@@ -1519,12 +1656,7 @@
 
         // Render ulang dari data yang sudah dimuat (filter tanggal/kurir tanpa fetch ulang)
         function opRenderRiwayatTampil() {
-            if (ADMIN_LOGIN) {
-                opRenderRekapAdmin();
-                return;
-            }
-            document.getElementById('op_admin_rekap').style.display = 'none';
-            opRenderKartuLaporan(OP_DATA_LAPORAN, 'op_daftar_list', 'op_daftar_kosong', false);
+            opRenderRekapAdmin();
         }
 
         // ===================== OPERASIONAL: LAPORAN GUDANG =====================
@@ -1585,17 +1717,12 @@
         async function opMuatRiwayatGudang() {
             document.getElementById('loading_overlay').style.display = 'flex';
             try {
-                let hasil;
-                if (ADMIN_LOGIN) {
-                    const [h1, h2] = await Promise.all([
-                        panggilOpGAS({ action: 'muat_laporan_gudang', area: OP_AREA_AKTIF }),
-                        panggilOpGAS({ action: 'daftar_kurir', area: OP_AREA_AKTIF }).catch(() => null)
-                    ]);
-                    hasil = h1;
-                    OP_DAFTAR_KURIR = (h2 && h2.status === 'success' && Array.isArray(h2.data)) ? h2.data : OP_DAFTAR_KURIR;
-                } else {
-                    hasil = await panggilOpGAS({ action: 'muat_laporan_gudang', area: OP_AREA_AKTIF, petugasFilter: OP_USER_AKTIF });
-                }
+                // Semua akun (bukan cuma admin) memuat data SEMUA petugas di areanya.
+                const [hasil, h2] = await Promise.all([
+                    panggilOpGAS({ action: 'muat_laporan_gudang', area: OP_AREA_AKTIF }),
+                    panggilOpGAS({ action: 'daftar_kurir', area: OP_AREA_AKTIF }).catch(() => null)
+                ]);
+                OP_DAFTAR_KURIR = (h2 && h2.status === 'success' && Array.isArray(h2.data)) ? h2.data : OP_DAFTAR_KURIR;
 
                 if (hasil.status !== 'success') {
                     alert("Gagal memuat data: " + (hasil.message || 'Terjadi kesalahan.'));
@@ -1604,7 +1731,7 @@
                 OP_DATA_LAPORAN_GUDANG = hasil.data || [];
                 OP_DATA_LAPORAN_GUDANG.sort((a, b) => opTanggalLaporan(b).localeCompare(opTanggalLaporan(a)) || (new Date(b.timestamp) - new Date(a.timestamp)));
                 OP_SUDAH_MUAT_GUDANG = true;
-                if (ADMIN_LOGIN) opIsiDropdownPetugasGudang();
+                opIsiDropdownPetugasGudang();
                 opRenderRekapGudang();
             } catch (e) {
                 alert("Gagal menghubungi server. Cek koneksi internet lalu coba lagi.");
@@ -1632,24 +1759,7 @@
 
             if (!OP_SUDAH_MUAT_GUDANG) return;
 
-            if (!ADMIN_LOGIN) {
-                rekap.style.display = 'none';
-                if (OP_DATA_LAPORAN_GUDANG.length === 0) {
-                    kosong.style.display = 'block';
-                    kosong.innerText = 'Belum ada laporan gudang.';
-                    return;
-                }
-                kosong.style.display = 'none';
-                document.getElementById('op_gudang_list').innerHTML = OP_DATA_LAPORAN_GUDANG.map(l => `
-                    <div class="card" style="margin-bottom:10px; border-left: 4px solid #16a34a;">
-                        <div style="font-size:12px; color:#64748b;">📅 ${opEsc(opFormatTanggal(opTanggalLaporan(l)))}</div>
-                        <div style="font-weight:700; font-size:16px; margin-top:4px;">Jumlah Faktur: ${l.jumlahFaktur ?? 0}</div>
-                    </div>
-                `).join('');
-                return;
-            }
-
-            // --- Admin: filter tanggal + petugas, lalu rekap & grafik ---
+            // --- Semua akun: filter tanggal + petugas, lalu rekap & grafik ---
             const dari = document.getElementById('op_gudang_tgl_dari').value;
             const sampai = document.getElementById('op_gudang_tgl_sampai').value;
             const petugasDipilih = document.getElementById('op_gudang_filter_petugas').value;
@@ -1694,11 +1804,18 @@
                 + (petugasDipilih ? ` · Petugas: <b>${opEsc(petugasDipilih)}</b>` : '')
                 + `<div style="margin-top:6px; font-size:15px;">Total Faktur Dikerjakan: <b style="color:#16a34a;">${totalFaktur}</b></div>`;
 
-            const petugasList = Object.entries(perPetugas).sort((a, b) => b[1] - a[1]);
+            const petugasList = Object.entries(perPetugas).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+            const punyaSaya = !ADMIN_LOGIN ? OP_USER_AKTIF.toLowerCase() : '';
+            const adaSaya = petugasList.some(([p]) => p.toLowerCase() === punyaSaya);
+            const [namaTop, nilaiTop] = petugasList[0];
+            document.getElementById('op_gudang_ringkasan').innerHTML += `<div style="margin-top:4px;">🥇 Terbanyak: <b>${opEsc(namaTop)}</b> (${nilaiTop} faktur)</div>`;
+
             let html = '';
-            html += opJudulGrafik('Performa Anak Gudang — Total Faktur Dikerjakan', 'Perbandingan petugas pada rentang tanggal ini');
-            html += opBarHtml(petugasList.slice(0, 15).map(([p, n]) => ({ label: p, value: n, color: '#2563eb' })),
-                petugasList.length > 15 ? '15 petugas teratas' : '');
+            html += opJudulGrafik('Performa Anak Gudang — Total Faktur Dikerjakan', 'Urut dari yang terbanyak, pada rentang tanggal ini');
+            html += opBarHtml(petugasList.slice(0, 15).map(([p, n], i) => {
+                const saya = p.toLowerCase() === punyaSaya;
+                return { label: (i + 1) + '. ' + p + (saya ? ' ★' : ''), value: n, color: saya ? '#f59e0b' : '#2563eb' };
+            }), (petugasList.length > 15 ? '15 petugas teratas. ' : '') + (adaSaya ? '★ = kamu' : ''));
             document.getElementById('op_gudang_charts').innerHTML = html;
 
             document.getElementById('op_gudang_detail_list').innerHTML = data.map(l => `
@@ -1716,10 +1833,10 @@
             const maks = Math.max(0, ...items.map(i => i.value));
             const baris = items.map(i => {
                 const lebar = maks > 0 ? Math.round((i.value / maks) * 100) : 0;
-                const labelNilai = i.valueLabel !== undefined ? i.valueLabel : i.value;
+                const labelNilai = i.valueLabel !== undefined ? i.valueLabel : (Math.round(i.value * 100) / 100);
                 return `
                     <div style="display:flex; align-items:center; gap:8px; margin:6px 0;">
-                        <div style="width:82px; flex-shrink:0; font-size:12px; color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${opEsc(i.label)}">${opEsc(i.label)}</div>
+                        <div style="width:108px; flex-shrink:0; font-size:12px; color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${opEsc(i.label)}">${opEsc(i.label)}</div>
                         <div style="flex:1; background:#f1f5f9; border-radius:6px; height:22px; overflow:hidden;">
                             <div style="width:${lebar}%; min-width:${i.value > 0 ? 3 : 0}px; height:100%; background:${i.color || '#16a34a'}; border-radius:6px;"></div>
                         </div>
@@ -1736,6 +1853,38 @@
         // Sub-judul nama kurir, dipakai untuk mengelompokkan beberapa bar per kurir dalam 1 grafik.
         function opJudulSubKurir(nama) {
             return `<div style="font-size:12px; font-weight:700; color:#334155; margin-top:10px;">${opEsc(nama)}</div>`;
+        }
+
+        // "B1:5, D1:3" -> { B1: 5, D1: 3 } (laporan lama tanpa kolom ini -> {})
+        function opParseRuteFaktur(str) {
+            const out = {};
+            String(str || '').split(',').forEach(x => {
+                const [k, v] = x.split(':').map(s => s.trim());
+                const n = parseInt(v, 10);
+                if (k && !isNaN(n)) out[k] = n;
+            });
+            return out;
+        }
+
+        // "B1 (5), D1 (3)" kalau ada jumlah per rute, kalau tidak ya "B1, D1"
+        function opRuteLabel(l) {
+            const rf = opParseRuteFaktur(l.ruteFaktur);
+            const daftar = String(l.ruteArea || '').split(',').map(r => r.trim()).filter(Boolean);
+            if (daftar.length === 0) return '-';
+            return daftar.map(r => rf[r] !== undefined ? r + ' (' + rf[r] + ' faktur)' : r).join(', ');
+        }
+
+        function opDataTerfilter() {
+            const dari = document.getElementById('op_admin_tgl_dari').value;
+            const sampai = document.getElementById('op_admin_tgl_sampai').value;
+            const kurirDipilih = document.getElementById('op_admin_filter_kurir').value;
+            return OP_DATA_LAPORAN.filter(l => {
+                const t = opTanggalLaporan(l);
+                if (dari && t < dari) return false;
+                if (sampai && t > sampai) return false;
+                if (kurirDipilih && String(l.kurir) !== kurirDipilih) return false;
+                return true;
+            });
         }
 
         function opRenderRekapAdmin() {
@@ -1756,13 +1905,7 @@
                 return;
             }
 
-            const data = OP_DATA_LAPORAN.filter(l => {
-                const t = opTanggalLaporan(l);
-                if (dari && t < dari) return false;
-                if (sampai && t > sampai) return false;
-                if (kurirDipilih && String(l.kurir) !== kurirDipilih) return false;
-                return true;
-            });
+            const data = opDataTerfilter();
 
             if (data.length === 0) {
                 rekap.style.display = 'none';
@@ -1774,10 +1917,12 @@
             rekap.style.display = 'block';
 
             // --- hitung ---
-            const total = { faktur: 0, cash: 0, tempo: 0, revisi: 0, rma: 0, suratJalan: 0, fakturTidak: 0, toko: 0, tokoTidak: 0, nilaiCashTagihan: 0 };
+            const total = { faktur: 0, cash: 0, tempo: 0, revisi: 0, rma: 0, suratJalan: 0, fakturTidak: 0, toko: 0, tokoTidak: 0, nilaiCashTagihan: 0,
+                otSedang: 0, otJauh: 0, pAntaran: 0, pTagihan: 0, pTambahan: 0, tutup: 0, pergi: 0 };
             const hariSet = new Set();
             const perKurir = {};
             const perRute = {};
+            const fakturPerRute = {};
 
             data.forEach(l => {
                 const f = Number(l.jumlahFaktur) || 0;
@@ -1789,21 +1934,34 @@
                 total.suratJalan += Number(l.suratJalan) || 0;
                 total.fakturTidak += Number(l.fakturTidakKirim) || 0;
                 total.toko += Number(l.jumlahToko) || 0;
-                total.tokoTidak += Number(l.tokoTidakDikunjungi) || 0;
+                total.tokoTidak += Number(l.tokoTidakSampai) || 0;
+                total.otSedang += Number(l.overTrackSedang) || 0;
+                total.otJauh += Number(l.overTrackJauh) || 0;
+                total.pAntaran += Number(l.pointAntaran) || 0;
+                total.pTagihan += Number(l.pointTagihan) || 0;
+                total.pTambahan += Number(l.pointTambahan) || 0;
+                total.tutup += Number(l.tokoTutup) || 0;
+                total.pergi += Number(l.tokoTanpaAlasan) || 0;
                 total.nilaiCashTagihan += Number(l.nilaiCashTagihan) || 0;
                 hariSet.add(opTanggalLaporan(l));
 
                 const k = String(l.kurir || '-');
-                if (!perKurir[k]) perKurir[k] = { faktur: 0, toko: 0, tokoTidak: 0, fakturTidak: 0, nilaiCashTagihan: 0 };
+                if (!perKurir[k]) perKurir[k] = { faktur: 0, toko: 0, tokoTidak: 0, fakturTidak: 0, nilaiCashTagihan: 0, otSedang: 0, otJauh: 0, pointAT: 0, pTagihan: 0 };
                 perKurir[k].faktur += f;
                 perKurir[k].toko += Number(l.jumlahToko) || 0;
-                perKurir[k].tokoTidak += Number(l.tokoTidakDikunjungi) || 0;
+                perKurir[k].tokoTidak += Number(l.tokoTidakSampai) || 0;
+                perKurir[k].otSedang += Number(l.overTrackSedang) || 0;
+                perKurir[k].otJauh += Number(l.overTrackJauh) || 0;
+                perKurir[k].pointAT += (Number(l.pointAntaran) || 0) + (Number(l.pointTambahan) || 0);
+                perKurir[k].pTagihan += Number(l.pointTagihan) || 0;
                 perKurir[k].fakturTidak += Number(l.fakturTidakKirim) || 0;
                 perKurir[k].nilaiCashTagihan += Number(l.nilaiCashTagihan) || 0;
 
                 // 1 laporan yang memuat rute X dihitung 1 kali (walau rute sama diketik dobel)
                 new Set(String(l.ruteArea || '').split(',').map(r => r.trim()).filter(Boolean))
                     .forEach(r => { perRute[r] = (perRute[r] || 0) + 1; });
+                const rf = opParseRuteFaktur(l.ruteFaktur);
+                Object.keys(rf).forEach(r => { fakturPerRute[r] = (fakturPerRute[r] || 0) + rf[r]; });
             });
 
             const jumlahKurir = Object.keys(perKurir).length;
@@ -1829,12 +1987,39 @@
             html += opJudulGrafik('Kunjungan toko', 'Total dari semua laporan pada rentang tanggal ini');
             html += opBarHtml([
                 { label: 'Toko Dikunjungi', value: total.toko, color: '#16a34a' },
-                { label: 'Tidak Dikunjungi', value: total.tokoTidak, color: '#dc2626' }
+                { label: 'Tidak Sampai', value: total.tokoTidak, color: '#dc2626' }
+            ]);
+
+            const lamaTidak = Math.max(0, total.tokoTidak - total.tutup - total.pergi); // laporan lama, alasan belum dicatat
+            html += opJudulGrafik('Alasan toko tidak sampai', 'Total dari semua laporan pada rentang tanggal ini');
+            html += opBarHtml([
+                { label: 'Tutup', value: total.tutup, color: '#f59e0b' },
+                { label: 'Tanpa alasan / pergi', value: total.pergi, color: '#dc2626' }
+            ].concat(lamaTidak > 0 ? [{ label: 'Alasan tak tercatat', value: lamaTidak, color: '#94a3b8' }] : []));
+
+            html += opJudulGrafik('Over Track', 'Total dari semua laporan pada rentang tanggal ini');
+            html += opBarHtml([
+                { label: 'Over Track Sedang', value: total.otSedang, color: '#f59e0b' },
+                { label: 'Over Track Jauh', value: total.otJauh, color: '#dc2626' }
+            ]);
+
+            html += opJudulGrafik('Point', 'Total dari semua laporan pada rentang tanggal ini');
+            html += opBarHtml([
+                { label: 'Antaran', value: total.pAntaran, color: '#2563eb' },
+                { label: 'Tambahan', value: total.pTambahan, color: '#8b5cf6' },
+                { label: 'Antaran + Tambahan', value: total.pAntaran + total.pTambahan, color: '#16a34a' },
+                { label: 'Tagihan', value: total.pTagihan, color: '#0891b2' }
             ]);
 
             const rute = Object.entries(perRute).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 10);
             html += opJudulGrafik('Rute yang paling sering dikunjungi', 'Berapa kali rute itu muncul di laporan' + (Object.keys(perRute).length > 10 ? ' (10 teratas)' : ''));
             html += opBarHtml(rute.map(([r, n]) => ({ label: r, value: n, color: '#16a34a' })));
+
+            const rf = Object.entries(fakturPerRute).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 15);
+            if (rf.length > 0) {
+                html += opJudulGrafik('Jumlah faktur per rute', 'Total faktur yang diantar ke tiap rute pada rentang tanggal ini' + (Object.keys(fakturPerRute).length > 15 ? ' (15 teratas)' : ''));
+                html += opBarHtml(rf.map(([r, n]) => ({ label: r, value: n, color: '#0891b2' })));
+            }
 
             const kurirList = Object.entries(perKurir).sort((a, b) => b[1].faktur - a[1].faktur);
             if (!kurirDipilih && kurirList.length > 1) {
@@ -1843,11 +2028,22 @@
                 html += opJudulGrafik('Performa Kurir — Total Faktur', 'Perbandingan kurir pada rentang tanggal ini');
                 html += opBarHtml(kurirList.slice(0, 15).map(([k, v]) => ({ label: k, value: v.faktur, color: '#2563eb' })), batasKurir);
 
-                html += opJudulGrafik('Performa Kurir — Toko Dikunjungi vs Tidak', 'Semakin banyak toko tidak dikunjungi, semakin perlu dicek');
+                html += opJudulGrafik('Performa Kurir — Toko Dikunjungi vs Tidak Sampai', 'Semakin banyak toko tidak sampai, semakin perlu dicek');
                 const kurirToko = [...kurirList].sort((a, b) => b[1].tokoTidak - a[1].tokoTidak || b[1].toko - a[1].toko).slice(0, 15);
                 html += kurirToko.map(([k, v]) => opJudulSubKurir(k) + opBarHtml([
                     { label: 'Dikunjungi', value: v.toko, color: '#16a34a' },
                     { label: 'Tidak', value: v.tokoTidak, color: '#dc2626' }
+                ])).join('') + (batasKurir ? `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">${batasKurir}</div>` : '');
+
+                html += opJudulGrafik('Performa Kurir — Point Antaran + Tambahan', 'Makin besar makin baik');
+                const kurirPoint = [...kurirList].sort((a, b) => b[1].pointAT - a[1].pointAT).slice(0, 15);
+                html += opBarHtml(kurirPoint.map(([k, v]) => ({ label: k, value: v.pointAT, color: '#16a34a' })), batasKurir);
+
+                html += opJudulGrafik('Performa Kurir — Over Track', 'Sedang + jauh, makin kecil makin baik');
+                const kurirOt = [...kurirList].sort((a, b) => (b[1].otSedang + b[1].otJauh) - (a[1].otSedang + a[1].otJauh)).slice(0, 15);
+                html += kurirOt.map(([k, v]) => opJudulSubKurir(k) + opBarHtml([
+                    { label: 'Sedang', value: v.otSedang, color: '#f59e0b' },
+                    { label: 'Jauh', value: v.otJauh, color: '#dc2626' }
                 ])).join('') + (batasKurir ? `<div style="font-size:11px; color:#94a3b8; margin-top:4px;">${batasKurir}</div>` : '');
 
                 html += opJudulGrafik('Performa Kurir — Faktur Tidak Dikirim', 'Makin kecil makin baik');
@@ -1865,7 +2061,197 @@
             opRenderKartuLaporan(data, 'op_admin_detail_list', 'op_admin_detail_kosong', true);
         }
 
-        // dipakai bareng oleh Riwayat Saya (kurir) & Dashboard Admin
+        // ===================== PERIODE CEPAT + EXPORT =====================
+        function opTglKeStr(d) { // d = Date UTC
+            return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+        }
+
+        // Minggu = Senin s/d Minggu. "Ini" dipotong sampai hari ini.
+        function opHitungPeriode(jenis, hariIniStr) {
+            const [y, m, d] = hariIniStr.split('-').map(Number);
+            const hari = new Date(Date.UTC(y, m - 1, d));
+            if (jenis === 'minggu_ini' || jenis === 'minggu_lalu') {
+                const selisihSenin = (hari.getUTCDay() + 6) % 7; // Senin = 0
+                const senin = new Date(hari.getTime() - selisihSenin * 86400000);
+                if (jenis === 'minggu_ini') return [opTglKeStr(senin), hariIniStr];
+                const seninLalu = new Date(senin.getTime() - 7 * 86400000);
+                const mingguLalu = new Date(senin.getTime() - 86400000);
+                return [opTglKeStr(seninLalu), opTglKeStr(mingguLalu)];
+            }
+            if (jenis === 'bulan_ini') return [opTglKeStr(new Date(Date.UTC(y, m - 1, 1))), hariIniStr];
+            const awal = new Date(Date.UTC(y, m - 2, 1));
+            const akhir = new Date(Date.UTC(y, m - 1, 0));
+            return [opTglKeStr(awal), opTglKeStr(akhir)];
+        }
+
+        function opSetPeriode(jenis) {
+            const [dari, sampai] = opHitungPeriode(jenis, opTanggalHariIni());
+            document.getElementById('op_admin_tgl_dari').value = dari;
+            document.getElementById('op_admin_tgl_sampai').value = sampai;
+            opRenderRiwayatTampil();
+        }
+
+        const OP_KOLOM_ANGKA = [
+            ['Total Faktur', 'faktur'], ['Cash', 'cash'], ['Tempo', 'tempo'], ['Revisi', 'revisi'], ['RMA', 'rma'],
+            ['Surat Jalan', 'suratJalan'], ['Faktur Tidak Dikirim', 'fakturTidak'],
+            ['Toko Dikunjungi', 'toko'], ['Toko Tidak Sampai', 'tokoTidak'], ['Toko Tutup', 'tutup'], ['Toko Tanpa Alasan/Pergi', 'pergi'],
+            ['Over Track Sedang', 'otSedang'], ['Over Track Jauh', 'otJauh'],
+            ['Point Antaran', 'pAntaran'], ['Point Tambahan', 'pTambahan'], ['Point Antaran+Tambahan', 'pAT'], ['Point Tagihan', 'pTagihan'],
+            ['Nilai Cash+Tagihan (Rp)', 'nilai']
+        ];
+
+        const opR2 = v => Math.round((Number(v) || 0) * 100) / 100;
+
+        function opBarisAngka(l) {
+            return {
+                faktur: Number(l.jumlahFaktur) || 0, cash: Number(l.fakturCash) || 0, tempo: Number(l.fakturTempo) || 0,
+                revisi: Number(l.fakturRevisi) || 0, rma: Number(l.fakturRMA) || 0, suratJalan: Number(l.suratJalan) || 0,
+                fakturTidak: Number(l.fakturTidakKirim) || 0, toko: Number(l.jumlahToko) || 0, tokoTidak: Number(l.tokoTidakSampai) || 0,
+                tutup: Number(l.tokoTutup) || 0, pergi: Number(l.tokoTanpaAlasan) || 0,
+                otSedang: Number(l.overTrackSedang) || 0, otJauh: Number(l.overTrackJauh) || 0,
+                pAntaran: opR2(l.pointAntaran), pTambahan: opR2(l.pointTambahan),
+                pAT: opR2((Number(l.pointAntaran) || 0) + (Number(l.pointTambahan) || 0)),
+                pTagihan: opR2(l.pointTagihan), nilai: Number(l.nilaiCashTagihan) || 0
+            };
+        }
+
+        // Ringkasan per kurir + baris total, dipakai Excel & PDF
+        function opSusunDataExport() {
+            const data = opDataTerfilter().slice().sort((a, b) =>
+                opTanggalLaporan(a).localeCompare(opTanggalLaporan(b)) || String(a.kurir).localeCompare(String(b.kurir)));
+            const per = {};
+            const total = {}; OP_KOLOM_ANGKA.forEach(([, k]) => total[k] = 0);
+            data.forEach(l => {
+                const k = String(l.kurir || '-');
+                if (!per[k]) { per[k] = { laporan: 0, hari: new Set() }; OP_KOLOM_ANGKA.forEach(([, c]) => per[k][c] = 0); }
+                per[k].laporan++; per[k].hari.add(opTanggalLaporan(l));
+                const b = opBarisAngka(l);
+                OP_KOLOM_ANGKA.forEach(([, c]) => { per[k][c] += b[c]; total[c] += b[c]; });
+            });
+            const kurirUrut = Object.keys(per).sort((a, b) => per[b].faktur - per[a].faktur || a.localeCompare(b));
+            const header = ['Kurir', 'Jumlah Laporan', 'Hari Aktif'].concat(OP_KOLOM_ANGKA.map(c => c[0]));
+            const rows = kurirUrut.map(k => [k, per[k].laporan, per[k].hari.size].concat(OP_KOLOM_ANGKA.map(([, c]) => opR2(per[k][c]))));
+            const hariSemua = new Set(data.map(opTanggalLaporan));
+            rows.push(['TOTAL', data.length, hariSemua.size].concat(OP_KOLOM_ANGKA.map(([, c]) => opR2(total[c]))));
+            const headerDetail = ['Tanggal', 'Kurir', 'Area', 'Rute', 'Faktur per Rute'].concat(OP_KOLOM_ANGKA.map(c => c[0]));
+            const rowsDetail = data.map(l => {
+                const b = opBarisAngka(l);
+                return [opTanggalLaporan(l), String(l.kurir || ''), String(l.area || ''), String(l.ruteArea || ''), String(l.ruteFaktur || '')]
+                    .concat(OP_KOLOM_ANGKA.map(([, c]) => b[c]));
+            });
+            const dari = document.getElementById('op_admin_tgl_dari').value;
+            const sampai = document.getElementById('op_admin_tgl_sampai').value;
+            const kurirDipilih = document.getElementById('op_admin_filter_kurir').value;
+            return { data, header, rows, headerDetail, rowsDetail, kurirUrut, per, dari, sampai, kurirDipilih };
+        }
+
+        function opNamaFileExport(e) {
+            const aman = t => String(t || 'semua').replace(/[^A-Za-z0-9_-]+/g, '_');
+            return 'Rekap_Kurir_' + aman(OP_AREA_AKTIF || 'SemuaArea') + '_' + (e.dari || 'awal') + '_sd_' + (e.sampai || 'akhir')
+                + (e.kurirDipilih ? '_' + aman(e.kurirDipilih) : '');
+        }
+
+        function opExportExcel() {
+            const e = opSusunDataExport();
+            if (e.data.length === 0) { alert('Belum ada data untuk di-export. Tekan "Muat / Refresh" dulu.'); return; }
+            if (!window.XLSX) { alert('Library Excel belum termuat (butuh internet saat membuka aplikasi). Cek koneksi lalu buka ulang.'); return; }
+            try {
+                const info = [
+                    ['REKAP LAPORAN KURIR'],
+                    ['Area', OP_AREA_AKTIF || 'Semua'],
+                    ['Periode', (e.dari || '-') + ' s/d ' + (e.sampai || '-')],
+                    ['Kurir', e.kurirDipilih || 'Semua kurir'],
+                    ['Dicetak', new Date().toLocaleString('id-ID')],
+                    []
+                ];
+                const wsRekap = XLSX.utils.aoa_to_sheet(info.concat([e.header], e.rows));
+                const wsDetail = XLSX.utils.aoa_to_sheet([e.headerDetail].concat(e.rowsDetail)); // tanggal = teks, tidak hilang
+                wsRekap['!cols'] = e.header.map((h, i) => ({ wch: i === 0 ? 18 : Math.max(10, Math.min(24, h.length + 2)) }));
+                wsDetail['!cols'] = e.headerDetail.map((h, i) => ({ wch: i === 0 ? 12 : Math.max(10, Math.min(24, h.length + 2)) }));
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, wsRekap, 'Rekap Per Kurir');
+                XLSX.utils.book_append_sheet(wb, wsDetail, 'Detail Laporan');
+                XLSX.writeFile(wb, opNamaFileExport(e) + '.xlsx');
+            } catch (err) {
+                alert('Gagal membuat file Excel: ' + err.message);
+            }
+        }
+
+        // Grafik batang sederhana di PDF (kotak berwarna), dipakai untuk perbandingan antar kurir
+        function opPdfGrafik(doc, judul, items, y, warna) {
+            const kiri = 14, lebarLabel = 42, lebarBar = 170, tinggi = 6;
+            const butuh = 10 + items.length * (tinggi + 2);
+            if (y + butuh > doc.internal.pageSize.getHeight() - 10) { doc.addPage(); y = 16; }
+            doc.setFontSize(11); doc.setTextColor(15, 23, 42); doc.text(judul, kiri, y); y += 5;
+            const maks = Math.max(0, ...items.map(i => i.value));
+            doc.setFontSize(8);
+            items.forEach(i => {
+                const w = maks > 0 ? (i.value / maks) * lebarBar : 0;
+                doc.setTextColor(51, 65, 85);
+                doc.text(String(i.label).slice(0, 22), kiri, y + 4.3);
+                doc.setFillColor(...warna); if (w > 0) doc.rect(kiri + lebarLabel, y, Math.max(w, 0.8), tinggi, 'F');
+                doc.setTextColor(15, 23, 42); doc.text(String(opR2(i.value)), kiri + lebarLabel + w + 2, y + 4.3);
+                y += tinggi + 2;
+            });
+            return y + 4;
+        }
+
+        function opExportPDF() {
+            const e = opSusunDataExport();
+            if (e.data.length === 0) { alert('Belum ada data untuk di-export. Tekan "Muat / Refresh" dulu.'); return; }
+            if (!window.jspdf || !window.jspdf.jsPDF) { alert('Library PDF belum termuat (butuh internet saat membuka aplikasi). Cek koneksi lalu buka ulang.'); return; }
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+                doc.setFontSize(15); doc.setTextColor(15, 23, 42);
+                doc.text('REKAP LAPORAN KURIR', 14, 14);
+                doc.setFontSize(9); doc.setTextColor(71, 85, 105);
+                doc.text('Area: ' + (OP_AREA_AKTIF || 'Semua') + '   |   Periode: ' + (e.dari || '-') + ' s/d ' + (e.sampai || '-')
+                    + '   |   Kurir: ' + (e.kurirDipilih || 'Semua kurir') + '   |   Dicetak: ' + new Date().toLocaleString('id-ID'), 14, 20);
+
+                const idx = n => e.header.indexOf(n);
+                const kolomPdf = ['Kurir', 'Jumlah Laporan', 'Hari Aktif', 'Total Faktur', 'Cash', 'Tempo', 'Revisi', 'RMA', 'Surat Jalan',
+                    'Faktur Tidak Dikirim', 'Toko Dikunjungi', 'Toko Tidak Sampai', 'Over Track Sedang', 'Over Track Jauh',
+                    'Point Antaran+Tambahan', 'Point Tagihan', 'Nilai Cash+Tagihan (Rp)'];
+                const pilih = row => kolomPdf.map(n => row[idx(n)]);
+                doc.autoTable({
+                    head: [kolomPdf.map(n => n.replace('Nilai Cash+Tagihan (Rp)', 'Nilai Cash+Tagihan'))],
+                    body: e.rows.map(r => { const x = pilih(r); x[x.length - 1] = opFormatRupiah(x[x.length - 1]); return x; }),
+                    startY: 25, styles: { fontSize: 7, cellPadding: 1.5 }, headStyles: { fillColor: [22, 163, 74] },
+                    didParseCell: h => { if (h.section === 'body' && h.row.index === e.rows.length - 1) h.cell.styles.fontStyle = 'bold'; }
+                });
+
+                // Grafik perbandingan antar kurir (maks 15 kurir)
+                if (e.kurirUrut.length > 1) {
+                    doc.addPage(); let y = 16;
+                    const top = (kunci, urut) => e.kurirUrut.slice().sort((a, b) => (urut ? e.per[a][kunci] - e.per[b][kunci] : e.per[b][kunci] - e.per[a][kunci])).slice(0, 15)
+                        .map(k => ({ label: k, value: e.per[k][kunci] }));
+                    y = opPdfGrafik(doc, 'Total Faktur per Kurir', top('faktur'), y, [37, 99, 235]);
+                    y = opPdfGrafik(doc, 'Point Antaran + Tambahan per Kurir', top('pAT'), y, [22, 163, 74]);
+                    y = opPdfGrafik(doc, 'Toko Tidak Sampai per Kurir (makin kecil makin baik)', top('tokoTidak'), y, [220, 38, 38]);
+                    y = opPdfGrafik(doc, 'Over Track Jauh per Kurir (makin kecil makin baik)', top('otJauh'), y, [245, 158, 11]);
+                    y = opPdfGrafik(doc, 'Faktur Tidak Dikirim per Kurir (makin kecil makin baik)', top('fakturTidak'), y, [220, 38, 38]);
+                }
+
+                // Detail tiap laporan
+                doc.addPage();
+                doc.setFontSize(12); doc.setTextColor(15, 23, 42); doc.text('Detail Laporan', 14, 14);
+                const kolomDetail = ['Tanggal', 'Kurir', 'Rute', 'Total Faktur', 'Cash', 'Tempo', 'Revisi', 'RMA', 'Surat Jalan', 'Faktur Tidak Dikirim',
+                    'Toko Dikunjungi', 'Toko Tidak Sampai', 'Over Track Sedang', 'Over Track Jauh', 'Point Antaran', 'Point Tambahan',
+                    'Point Antaran+Tambahan', 'Point Tagihan', 'Nilai Cash+Tagihan (Rp)'];
+                const di = n => e.headerDetail.indexOf(n);
+                doc.autoTable({
+                    head: [kolomDetail.map(n => n.replace('Nilai Cash+Tagihan (Rp)', 'Nilai Cash+Tagihan'))],
+                    body: e.rowsDetail.map(r => kolomDetail.map(n => n === 'Nilai Cash+Tagihan (Rp)' ? opFormatRupiah(r[di(n)]) : r[di(n)])),
+                    startY: 18, styles: { fontSize: 6, cellPadding: 1 }, headStyles: { fillColor: [22, 163, 74] }
+                });
+                doc.save(opNamaFileExport(e) + '.pdf');
+            } catch (err) {
+                alert('Gagal membuat file PDF: ' + err.message);
+            }
+        }
+
+        // dipakai bareng oleh Riwayat & Dashboard Admin
         function opRenderKartuLaporan(data, idList, idKosong, tampilkanKurir) {
             const list = document.getElementById(idList);
             const kosong = document.getElementById(idKosong);
@@ -1880,11 +2266,14 @@
 
             list.innerHTML = data.map(l => {
                 const waktu = l.timestamp ? new Date(l.timestamp).toLocaleString('id-ID') : '-';
-                const labelKurir = tampilkanKurir ? `<div style="font-size:11px; color:#94a3b8; margin-top:8px;">Kurir: ${opEsc(l.kurir)} (${opEsc(l.area)}) · diinput ${waktu}</div>` : `<div style="font-size:11px; color:#94a3b8; margin-top:8px;">Diinput ${waktu}</div>`;
+                const labelKurir = `<div style="font-size:11px; color:#94a3b8; margin-top:8px;">Diinput ${waktu}</div>`;
                 return `
                     <div class="card" style="margin-bottom:10px; border-left: 4px solid #16a34a;">
-                        <div style="font-size:12px; color:#64748b;">📅 ${opEsc(opFormatTanggal(opTanggalLaporan(l)))}</div>
-                        <div style="font-weight:700; font-size:14px;">Rute: ${opEsc(l.ruteArea || '-')}</div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                            <div style="font-size:12px; color:#64748b;">📅 ${opEsc(opFormatTanggal(opTanggalLaporan(l)))}</div>
+                            <div style="background:#dcfce7; color:#166534; font-weight:700; font-size:12px; padding:2px 10px; border-radius:999px; max-width:55%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Petugas yang input">👤 ${opEsc(l.kurir)}</div>
+                        </div>
+                        <div style="font-weight:700; font-size:14px;">Rute: ${opEsc(opRuteLabel(l))}</div>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px 12px; font-size:13px; margin-top:8px;">
                             <div>Jumlah Faktur: <b>${l.jumlahFaktur ?? 0}</b></div>
                             <div>Cash: <b>${l.fakturCash ?? 0}</b></div>
@@ -1896,7 +2285,16 @@
                         </div>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px 12px; font-size:13px; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
                             <div>Toko Dikunjungi: <b>${l.jumlahToko ?? 0}</b></div>
-                            <div>Toko Tidak Dikunjungi: <b style="${(l.tokoTidakDikunjungi ?? 0) > 0 ? 'color:#dc2626;' : ''}">${l.tokoTidakDikunjungi ?? 0}</b></div>
+                            <div>Toko Tidak Sampai: <b style="${(l.tokoTidakSampai ?? 0) > 0 ? 'color:#dc2626;' : ''}">${l.tokoTidakSampai ?? 0}</b></div>
+                            ${(l.tokoTutup > 0 || l.tokoTanpaAlasan > 0) ? `<div style="grid-column:1/-1; font-size:12px; color:#64748b;">Tutup: <b>${l.tokoTutup ?? 0}</b> · Tanpa alasan / pergi: <b>${l.tokoTanpaAlasan ?? 0}</b></div>` : ''}
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px 12px; font-size:13px; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
+                            <div>Over Track Sedang: <b>${l.overTrackSedang ?? 0}</b></div>
+                            <div>Over Track Jauh: <b style="${(l.overTrackJauh ?? 0) > 0 ? 'color:#dc2626;' : ''}">${l.overTrackJauh ?? 0}</b></div>
+                            <div>Point Antaran: <b>${l.pointAntaran ?? 0}</b></div>
+                            <div>Point Tambahan: <b>${l.pointTambahan ?? 0}</b></div>
+                            <div>Antaran + Tambahan: <b style="color:#16a34a;">${Math.round(((Number(l.pointAntaran) || 0) + (Number(l.pointTambahan) || 0)) * 100) / 100}</b></div>
+                            <div>Point Tagihan: <b>${l.pointTagihan ?? 0}</b></div>
                         </div>
                         <div style="font-size:13px; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">Nilai Cash + Tagihan: <b>${opFormatRupiah(l.nilaiCashTagihan)}</b></div>
                         ${labelKurir}
