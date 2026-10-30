@@ -802,6 +802,13 @@
                 <datalist id="daftar_gudang"></datalist>
             </div>
 
+            <!-- Tanggal DN: boleh tanggal lalu (misal sisa barang DN kemarin), tidak boleh masa depan -->
+            <div class="form-group">
+                <label for="tanggal_input">Tanggal Data (DN)</label>
+                <input type="date" id="tanggal_input">
+                <div style="font-size:12px; color:#64748b; margin-top:6px;">Otomatis hari ini. Kalau ini sisa barang DN hari lain, ganti ke tanggal DN-nya. Berlaku untuk semua barang di daftar yang dikirim sekaligus.</div>
+            </div>
+
             <!-- Input Kolian (cuma relevan buat Barang Masuk) -->
             <div class="form-group" id="grup_kolian">
                 <label for="jumlah_kolian">Jumlah Kolian (Global)</label>
@@ -932,11 +939,11 @@
 
     <script>
         // Gantilah dengan URL Web App dari Apps Script kamu
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbynmpSJ76GpduCkgjSXE8C1TCECYhixHQpQCy2TEG6Cz4QjjXwW1Scp3JvboQ0RVaDZhg/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwabrPoQLfobkuGkF4f5MbAARxaKjdtfs-OmvrOrtl9y_fjtW24gXgYmxN31hYuKCl6zw/exec";
 
         // URL Web App KHUSUS modul Operasional (deploy Code_Operasional.gs
         // di spreadsheet TERPISAH, lalu tempel URL-nya di sini).
-        const OP_GAS_URL = "https://script.google.com/macros/s/AKfycby_TjzN1922Uih31gdd2kXctVkT6Sxgy_DdugiLTR0D4FFRu4GtEib3b01m84y0KfwIGg/exec";
+        const OP_GAS_URL = "https://script.google.com/macros/s/AKfycbxpjvq1c8GgkmX1fi2dcCGpCrlr8y2eRHtPaL0dcPUmaA6nBPiyk8w08C3X42qDrKqSew/exec";
 
         // PASSWORD PER CABANG
         const PASWORD_CABANG = {
@@ -2466,6 +2473,13 @@
             simpanKeLocalStorage();
         }
 
+        function gudangSetTanggalHariIni() {
+            const el = document.getElementById('tanggal_input');
+            const hariIni = opTanggalHariIni();
+            el.max = hariIni;
+            el.value = hariIni;
+        }
+
         function hapusSemua() {
             if (confirm("Yakin ingin menghapus seluruh daftar barang?")) {
                 DAFTAR_BARANG = [];
@@ -2578,6 +2592,16 @@
         jumlahKolian = document.getElementById('jumlah_kolian').value.trim();
     }
 
+    const hariIni = opTanggalHariIni();
+    const tanggalData = document.getElementById('tanggal_input').value || hariIni;
+    if (tanggalData > hariIni) {
+        alert("Tanggal data gak boleh lebih dari hari ini!");
+        return;
+    }
+    if (tanggalData !== hariIni && !confirm("Data ini akan dicatat dengan tanggal " + opFormatTanggal(tanggalData) + " (BUKAN hari ini).\n\nLanjut simpan?")) {
+        return;
+    }
+
     btn.disabled = true;
     btn.innerText = "Mengirim...";
     document.getElementById('loading_overlay').style.display = 'flex';
@@ -2594,6 +2618,7 @@
         merk: merkOpname,        // Cuma keisi kalau mode opname (Dura/Daytona/Osram)
         kolian: jumlahKolian,    // Cuma keisi kalau mode Barang Masuk
         batchId: batchId,        // Nomor tiket unik, dipakai server buat nolak kiriman dobel
+        tanggal: tanggalData,    // YYYY-MM-DD, tanggal DN (boleh tanggal lalu)
         gudang: gudang,          // WAJIB: Menggunakan 'gudang' agar pas dengan 'data.gudang'
         items: DAFTAR_BARANG     // Array barang
     };
@@ -2610,6 +2635,7 @@
             simpanKeLocalStorage();
             renderTabel();
             document.getElementById('nama_gudang').value = '';
+            gudangSetTanggalHariIni();
             if (MODE_AKTIF === 'opname') {
                 document.getElementById('hitungan_ke').value = '';
                 document.getElementById('merk_opname').value = '';
@@ -3119,6 +3145,7 @@
         }
 
         window.onload = function() {
+            gudangSetTanggalHariIni();
             cekSesiTersimpan();
             cekSesiOperasional();
         };
