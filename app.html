@@ -803,7 +803,7 @@
             </div>
 
             <!-- Tanggal DN: boleh tanggal lalu (misal sisa barang DN kemarin), tidak boleh masa depan -->
-            <div class="form-group">
+            <div class="form-group" id="grup_tanggal_input">
                 <label for="tanggal_input">Tanggal Data (DN)</label>
                 <input type="date" id="tanggal_input">
                 <div style="font-size:12px; color:#64748b; margin-top:6px;">Otomatis hari ini. Kalau ini sisa barang DN hari lain, ganti ke tanggal DN-nya. Berlaku untuk semua barang di daftar yang dikirim sekaligus.</div>
@@ -981,6 +981,7 @@
                 (mode === 'masuk') ? 'Rekap Gabungan Per-Penginput (Barang Masuk)' : 'Rekap Gabungan Per-Penginput (Stock Opname)';
 
             document.getElementById('grup_hitungan_ke').style.display = (mode === 'opname') ? 'block' : 'none';
+            document.getElementById('grup_tanggal_input').style.display = (mode === 'opname') ? 'none' : 'block'; // tanggal DN cuma buat Barang Masuk
             document.getElementById('grup_merk_opname').style.display = (mode === 'opname') ? 'block' : 'none';
             document.getElementById('grup_filter_hitungan').style.display = (mode === 'opname') ? 'block' : 'none';
             document.getElementById('grup_filter_merk').style.display = (mode === 'opname') ? 'block' : 'none';
@@ -2593,7 +2594,8 @@
     }
 
     const hariIni = opTanggalHariIni();
-    const tanggalData = document.getElementById('tanggal_input').value || hariIni;
+    // Stock Opname selalu dicatat hari ini (tanpa pilih tanggal)
+    const tanggalData = (MODE_AKTIF === 'opname') ? hariIni : (document.getElementById('tanggal_input').value || hariIni);
     if (tanggalData > hariIni) {
         alert("Tanggal data gak boleh lebih dari hari ini!");
         return;
@@ -2618,7 +2620,7 @@
         merk: merkOpname,        // Cuma keisi kalau mode opname (Dura/Daytona/Osram)
         kolian: jumlahKolian,    // Cuma keisi kalau mode Barang Masuk
         batchId: batchId,        // Nomor tiket unik, dipakai server buat nolak kiriman dobel
-        tanggal: tanggalData,    // YYYY-MM-DD, tanggal DN (boleh tanggal lalu)
+        tanggal: (MODE_AKTIF === 'opname') ? undefined : tanggalData,    // YYYY-MM-DD, tanggal DN (cuma Barang Masuk)
         gudang: gudang,          // WAJIB: Menggunakan 'gudang' agar pas dengan 'data.gudang'
         items: DAFTAR_BARANG     // Array barang
     };
