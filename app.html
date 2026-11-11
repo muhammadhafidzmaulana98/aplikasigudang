@@ -848,6 +848,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th style="width:44px; text-align:center;">No</th>
                             <th>Kode</th>
                             <th style="text-align: center;">Qty</th>
                             <th class="no-print" style="text-align: center;">Aksi</th>
@@ -918,6 +919,17 @@
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                 <button class="btn btn-print" onclick="downloadRekapExcel()" style="flex: 1;">📥 Excel</button>
                 <button class="btn btn-print" onclick="downloadRekapPDF()" style="flex: 1;">📥 PDF</button>
+            </div>
+
+            <!-- Cari kode di rekap tanpa scroll (cuma menyaring tampilan, file Excel/PDF tetap berisi semua baris) -->
+            <div class="no-print" style="margin-bottom: 12px;">
+                <div style="position: relative;">
+                    <input type="search" id="cari_rekap" placeholder="🔍 Cari kode barang..." autocomplete="off" inputmode="search"
+                           oninput="terapkanCariRekap()" style="width: 100%; padding-right: 40px;">
+                    <button type="button" id="btn_hapus_cari" onclick="hapusCariRekap()" aria-label="Hapus pencarian"
+                            style="display: none; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 18px; color: #64748b; padding: 6px 10px; cursor: pointer;">✕</button>
+                </div>
+                <div id="info_cari_rekap" style="font-size: 12px; color: #64748b; margin-top: 6px; display: none;"></div>
             </div>
 
             <div class="table-container">
@@ -2441,6 +2453,7 @@
                 const tr = document.createElement('tr');
                 tr.className = 'baris-muncul';
                 tr.innerHTML = `
+                    <td style="text-align:center; color:#64748b; font-size:13px;">${index + 1}</td>
                     <td>${item.kode}</td>
                     <td style="text-align: center;">${item.qty}</td>
                     <td class="no-print" style="text-align: center;">
@@ -2534,10 +2547,11 @@
             const tampilanAsli = tbody.innerHTML;
 
             tbody.innerHTML = '';
-            Object.values(gabung).forEach(item => {
+            Object.values(gabung).forEach((item, noUrut) => {
                 const tr = document.createElement('tr');
                 tr.className = 'baris-muncul';
                 tr.innerHTML = `
+                    <td style="text-align:center; color:#64748b; font-size:13px;">${noUrut + 1}</td>
                     <td>${item.kode}</td>
                     <td style="text-align: center;">${item.qty}</td>
                     <td class="no-print"></td>
@@ -2691,6 +2705,49 @@
             return { header: headerTeks, rows: dataBaris };
         }
 
+        // ===================== CARI KODE DI REKAP =====================
+        // Cuma menyembunyikan baris di layar. Export Excel/PDF tetap mengambil
+        // semua baris karena yang dibaca adalah isi tabelnya, bukan yang kelihatan.
+        function terapkanCariRekap() {
+            const input = document.getElementById('cari_rekap');
+            const kata = input.value.trim().toLowerCase();
+            document.getElementById('btn_hapus_cari').style.display = input.value ? 'block' : 'none';
+            const info = document.getElementById('info_cari_rekap');
+
+            const modeEdit = (document.getElementById('rekap_header').innerText || '').indexOf('Waktu') !== -1;
+            let total = 0, cocok = 0;
+
+            document.querySelectorAll('#rekap_body tr').forEach(tr => {
+                const sel = tr.querySelectorAll('td');
+                if (tr.querySelector('td[colspan]') || sel.length < 2) return;          // pesan kosong / memuat
+                if (sel[1].innerText.trim() === 'Jumlah Koli') { tr.style.display = ''; return; } // baris koli selalu tampil
+                total++;
+                // Rekap biasa: cocokkan kolom Kode saja (biar angka Qty gak ikut kecocokan).
+                // Mode Edit: Kode atau nama penginput.
+                const teks = modeEdit ? tr.innerText : sel[1].innerText;
+                const ketemu = !kata || teks.toLowerCase().indexOf(kata) !== -1;
+                tr.style.display = ketemu ? '' : 'none';
+                if (ketemu) cocok++;
+            });
+
+            if (!kata || total === 0) {
+                info.style.display = 'none';
+            } else {
+                info.style.display = 'block';
+                info.innerText = cocok === 0
+                    ? 'Kode "' + input.value.trim() + '" tidak ditemukan di rekap ini.'
+                    : 'Menampilkan ' + cocok + ' dari ' + total + ' baris.';
+                info.style.color = cocok === 0 ? '#dc2626' : '#64748b';
+            }
+        }
+
+        function hapusCariRekap() {
+            const input = document.getElementById('cari_rekap');
+            input.value = '';
+            terapkanCariRekap();
+            input.focus();
+        }
+
         function namaFileRekap() {
             const modeLabel = (MODE_AKTIF === 'opname') ? 'StockOpname' : 'BarangMasuk';
             const tanggal = new Date().toISOString().slice(0, 10);
@@ -2816,7 +2873,7 @@
             const isOpname = (MODE_AKTIF === 'opname');
 
             const theadTr = document.getElementById('rekap_header');
-            let headerHTML = `<th>Waktu</th><th>Gudang</th>`;
+            let headerHTML = `<th style="width:44px; text-align:center;">No</th><th>Waktu</th><th>Gudang</th>`;
             if (isOpname) {
                 headerHTML += `<th>Hitungan</th><th>Merk</th>`;
             } else {
@@ -2828,7 +2885,7 @@
             const tbody = document.getElementById('rekap_body');
             tbody.innerHTML = '';
 
-            const kolomTotal = isOpname ? 7 : 6;
+            const kolomTotal = isOpname ? 8 : 7;
 
             if (rawData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="' + kolomTotal + '" style="text-align:center; color:#64748b;">Belum ada data buat rentang tanggal ini.</td></tr>';
@@ -2838,12 +2895,13 @@
             // Urutkan dari yang paling baru biar gampang nemu transaksi terakhir
             const dataUrut = [...rawData].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-            dataUrut.forEach(item => {
+            dataUrut.forEach((item, noUrut) => {
                 const tr = document.createElement('tr');
                 tr.className = 'baris-muncul';
                 const waktuTampil = new Date(item.timestamp).toLocaleString('id-ID');
 
                 let rowHTML = `
+                    <td style="text-align:center; color:#64748b; font-size:13px;">${noUrut + 1}</td>
                     <td style="font-size: 12px;">${waktuTampil}</td>
                     <td>${item.gudang}</td>
                 `;
@@ -2966,7 +3024,7 @@
 
             // Render header
             const theadTr = document.getElementById('rekap_header');
-            let headerHTML = `<th>Kode</th>`;
+            let headerHTML = `<th style="width:44px; text-align:center;">No</th><th>Kode</th>`;
             DAFTAR_HITUNGAN.forEach(h => {
                 headerHTML += `<th style="text-align: center;">${h}</th>`;
             });
@@ -2979,11 +3037,11 @@
 
             const semuaKode = Object.keys(rekapMap);
             if (semuaKode.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#64748b;">Belum ada data Stock Opname buat rentang/filter ini.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#64748b;">Belum ada data Stock Opname buat rentang/filter ini.</td></tr>';
                 return;
             }
 
-            semuaKode.forEach(kode => {
+            semuaKode.forEach((kode, noUrut) => {
                 const row = rekapMap[kode];
                 const nilaiTerisi = DAFTAR_HITUNGAN
                     .map(h => row.perHitungan[h])
@@ -2998,7 +3056,7 @@
                     tr.style.background = '#fee2e2';
                 }
 
-                let rowHTML = `<td><strong>${row.kode}</strong></td>`;
+                let rowHTML = `<td style="text-align:center; color:#64748b; font-size:13px;">${noUrut + 1}</td><td><strong>${row.kode}</strong></td>`;
                 DAFTAR_HITUNGAN.forEach(h => {
                     const nilai = row.perHitungan[h];
                     rowHTML += `<td style="text-align: center;">${nilai !== undefined ? nilai : '-'}</td>`;
@@ -3052,7 +3110,7 @@
 
             // 3. Render Header Tabel
             const theadTr = document.getElementById('rekap_header');
-            let headerHTML = `<th>Kode</th>`;
+            let headerHTML = `<th style="width:44px; text-align:center;">No</th><th>Kode</th>`;
             listPenginput.forEach(nama => {
                 headerHTML += `<th style="text-align: center;">${nama}</th>`;
             });
@@ -3063,10 +3121,11 @@
             const tbody = document.getElementById('rekap_body');
             tbody.innerHTML = '';
 
-            Object.values(rekapMap).forEach(row => {
+            Object.values(rekapMap).forEach((row, noUrut) => {
                 const tr = document.createElement('tr');
                 tr.className = 'baris-muncul';
                 let rowHTML = `
+                    <td style="text-align:center; color:#64748b; font-size:13px;">${noUrut + 1}</td>
                     <td>${row.kode}</td>
                 `;
 
@@ -3133,7 +3192,7 @@
                 const trKoli = document.createElement('tr');
                 trKoli.style.fontWeight = 'bold';
                 trKoli.style.borderTop = '2px solid #334155';
-                let koliHTML = `<td>Jumlah Koli</td>`;
+                let koliHTML = `<td></td><td>Jumlah Koli</td>`;
                 let totalKoliSemua = 0;
                 listPenginput.forEach(nama => {
                     const nilaiKoli = koliPerGudang[nama] || 0;
@@ -3148,6 +3207,8 @@
 
         window.onload = function() {
             gudangSetTanggalHariIni();
+            // Setiap rekap digambar ulang (Muat/Refresh, pindah mode), terapkan lagi pencariannya
+            new MutationObserver(terapkanCariRekap).observe(document.getElementById('rekap_body'), { childList: true });
             cekSesiTersimpan();
             cekSesiOperasional();
         };
