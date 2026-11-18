@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Input Barang Datang</title>
+    <meta name="theme-color" content="#0B2545">
+    <title>CV. Buana Sinar Abadi</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
@@ -372,13 +373,253 @@
                 padding: 6px;
             }
         }
+        /* =====================================================================
+           TEMA CV. BUANA SINAR ABADI
+           Navy tua (malam gudang) + emas matahari (sinar). Maskot: matahari
+           terbit di atas kotak barang. Ditaruh di akhir supaya menimpa gaya
+           dasar di atas tanpa mengubah satu pun fungsi aplikasi.
+           ===================================================================== */
+        :root {
+            --primary: #0B2545;
+            --primary-dark: #071a31;
+            --sun: #F4A300;
+            --sun-soft: #FFD166;
+            --sun-tint: #FFF3D1;
+            --bg: #EDF2F7;
+            --surface: #ffffff;
+            --text: #0B1B2E;
+            --muted: #5B6B7F;
+            --border: #D6E0EA;
+            --danger: #D64545;
+            --success: #1C8F63;
+        }
+
+        body {
+            background:
+                radial-gradient(120% 60% at 50% -10%, #FFF6DD 0%, rgba(255,246,221,0) 55%),
+                var(--bg);
+            font-feature-settings: "tnum" 1;
+        }
+
+        /* ---- Kepala: logo + nama CV ---- */
+        .header.bsa-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-align: left;
+            padding: 16px 16px 20px;
+            background: linear-gradient(160deg, #0B2545 0%, #13315C 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 24px -12px rgba(11, 37, 69, 0.7);
+            overflow: hidden;
+        }
+        /* garis cakrawala emas di dasar kepala */
+        .header.bsa-header::after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent 0%, var(--sun) 25%, var(--sun-soft) 50%, var(--sun) 75%, transparent 100%);
+        }
+        .bsa-logo { flex: 0 0 auto; width: 62px; height: 62px; }
+        .bsa-logo svg, .bsa-logo img { width: 100%; height: 100%; display: block; object-fit: contain; }
+        .bsa-nama { min-width: 0; }
+        .bsa-nama .bsa-cv {
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            line-height: 1.15;
+            color: #fff;
+        }
+        .bsa-nama .bsa-fungsi {
+            font-size: 13px;
+            font-weight: 500;
+            color: #B9C7DA;
+            margin-top: 3px;
+        }
+        .bsa-nama .bsa-cabang {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(244, 163, 0, 0.16);
+            color: var(--sun-soft);
+            font-size: 12px;
+            font-weight: 700;
+            opacity: 1 !important;
+        }
+
+        /* ---- Satu-satunya momen animasi: matahari terbit saat halaman dibuka ---- */
+        .bsa-sun { transform-box: view-box; transform-origin: 32px 40px; animation: matahariTerbit 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) 0.15s both; }
+        .bsa-rays { transform-box: view-box; transform-origin: 32px 40px; animation: sinarMenyebar 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) 0.7s both; }
+        .bsa-box { animation: kotakNaik 0.5s ease-out 0s both; }
+        @keyframes matahariTerbit { from { transform: scaleY(0.05); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+        @keyframes sinarMenyebar { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes kotakNaik { from { transform: translateY(6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Saat menyimpan: logo berdenyut, menjawab aksi pengguna */
+        .bsa-loading { width: 76px; height: 76px; animation: denyut 1.1s ease-in-out infinite; }
+        .bsa-loading svg { width: 100%; height: 100%; display: block; }
+        .bsa-loading .bsa-sun, .bsa-loading .bsa-rays, .bsa-loading .bsa-box { animation: none; }
+        @keyframes denyut { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+        /* ---- Kartu bagian ---- */
+        .card {
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 0 rgba(11, 37, 69, 0.04);
+        }
+        .card h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text);
+            font-weight: 800;
+            letter-spacing: -0.005em;
+            line-height: 1.25;
+        }
+        .card h3::before {
+            content: "";
+            flex: 0 0 auto;
+            width: 5px;
+            height: 18px;
+            border-radius: 3px;
+            background: var(--sun);
+        }
+
+        /* ---- Isian ---- */
+        label { color: #33475E; }
+        input, select {
+            border: 1.5px solid #C4D2E0;
+            border-radius: 10px;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        input:focus, select:focus {
+            border-color: var(--sun);
+            box-shadow: 0 0 0 3px rgba(244, 163, 0, 0.28);
+        }
+        :focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+        .qty-btn { border-radius: 10px; background: var(--sun-tint); border-color: #F1D28A; color: var(--primary); }
+        .qty-btn:active { background: var(--sun-soft); }
+
+        /* ---- Tombol ---- */
+        .btn { border-radius: 12px; letter-spacing: 0.005em; }
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 6px 14px -8px rgba(11, 37, 69, 0.9); }
+        .btn-primary:active { background: var(--primary-dark); }
+        .btn-tambah {
+            background: linear-gradient(180deg, #FFB81F 0%, var(--sun) 100%);
+            color: #1A1200;
+            font-weight: 800;
+            box-shadow: 0 6px 14px -8px rgba(196, 123, 0, 0.95), inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+        }
+        .btn-tambah:active { background: var(--sun); }
+        .btn-print { background: var(--success); }
+        .btn-clear { background: #5B6B7F; }
+        .btn-danger { border-radius: 8px; }
+
+        /* ---- Tabel ---- */
+        th {
+            background: #E8EEF5;
+            color: #34506E;
+            font-size: 12.5px;
+            font-weight: 700;
+        }
+        td:first-child, th:first-child { padding-left: 6px; }
+        td { font-variant-numeric: tabular-nums; }
+        .cell-check {
+            border-radius: 8px;
+            background: #EEF3F8;
+            transition: background 0.18s ease, box-shadow 0.18s ease;
+        }
+        /* Sudah dicek = menyala emas, jadi gampang dibedakan dari yang belum */
+        .cell-check:has(input:checked) {
+            background: var(--sun-tint);
+            box-shadow: inset 0 0 0 1.5px var(--sun);
+        }
+        .cell-check input[type="checkbox"] { accent-color: #C47B00; }
+
+        /* ---- Pencarian ---- */
+        #cari_rekap { padding-left: 14px; }
+        #cari_rekap::-webkit-search-cancel-button, #cari_rekap::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+        @media (max-width: 360px) {
+            .bsa-logo { width: 52px; height: 52px; }
+            .bsa-nama .bsa-cv { font-size: 17px; }
+        }
+        @media print {
+            .bsa-logo, .bsa-loading { display: none !important; }
+        }
+
+        /* ---- Tambahan khusus aplikasi gabungan (login, pilih modul, Operasional) ---- */
+        .login-overlay {
+            background:
+                radial-gradient(60% 40% at 50% 100%, rgba(244,163,0,0.28) 0%, rgba(244,163,0,0) 70%),
+                radial-gradient(circle at 15% 15%, rgba(255,255,255,0.06) 0%, transparent 40%),
+                linear-gradient(160deg, #071a31 0%, #0B2545 50%, #13315C 100%);
+            background-size: 100% 100%;
+            animation: none;
+        }
+        .login-card { border-radius: 20px; border: 1px solid rgba(255,209,102,0.35); position: relative; }
+        .login-card h2 { color: var(--primary) !important; font-weight: 800; letter-spacing: -0.01em; }
+        .login-card p { color: var(--muted); }
+        .bsa-brand { display: flex; flex-direction: column; align-items: center; margin-bottom: 14px; }
+        .bsa-badge {
+            width: 76px; height: 76px; padding: 7px; border-radius: 22px;
+            background: linear-gradient(160deg, #0B2545 0%, #13315C 100%);
+            box-shadow: 0 10px 22px -10px rgba(11,37,69,0.8), inset 0 0 0 1.5px rgba(255,209,102,0.45);
+        }
+        .bsa-badge svg, .bsa-badge img { width: 100%; height: 100%; display: block; object-fit: contain; }
+        .bsa-brand .bsa-cv { margin-top: 10px; font-size: 15px; font-weight: 800; color: var(--primary); letter-spacing: 0.01em; }
+        .login-card.kecil .bsa-badge { width: 52px; height: 52px; padding: 5px; border-radius: 15px; }
+        .login-card.kecil .bsa-brand { margin-bottom: 8px; }
+        .login-card.kecil .bsa-brand .bsa-cv { font-size: 12px; margin-top: 6px; }
+
+        /* Tombol hijau Operasional -> navy; modul Operasional di menu = emas */
+        .btn[style*="#16a34a"] { background: var(--primary) !important; color: #fff !important; box-shadow: 0 6px 14px -8px rgba(11,37,69,0.9); }
+        #pilih_modul_overlay .btn[style*="#16a34a"] {
+            background: linear-gradient(180deg, #FFB81F 0%, var(--sun) 100%) !important;
+            color: #1A1200 !important;
+            box-shadow: 0 6px 14px -8px rgba(196,123,0,0.95), inset 0 -2px 0 rgba(0,0,0,0.12);
+        }
+        #pilih_modul_overlay .btn { border-radius: 14px; }
+        button[style*="color: #16a34a"] { color: var(--primary) !important; font-weight: 700; }
+        a[style*="#16a34a"] { color: #9A5F00 !important; }
+        .tab-btn { border-radius: 12px; border-color: var(--border); }
+        .tab-btn.tab-aktif { background: var(--primary); border-color: var(--primary) !important; box-shadow: inset 0 -3px 0 var(--sun), 0 6px 14px -8px rgba(11,37,69,0.9); }
+        button[style*="background:#16a34a"], button[style*="background: #16a34a"] { background: var(--primary) !important; }
+        .tab-btn:not(.tab-aktif)[style*="#16a34a"] { border-color: var(--border) !important; }
+        [style*="solid #16a34a"] { border-color: var(--primary) !important; }
+        [style*="border-left: 4px solid #16a34a"] { border-left: 4px solid var(--sun) !important; }
+        [style*="background:#dcfce7"] { background: var(--sun-tint) !important; color: #7A4A00 !important; }
+
+        /* Kepala dengan tombol Keluar */
+        .header.bsa-header .bsa-keluar {
+            flex: 0 0 auto; margin-left: auto; align-self: flex-start;
+            background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.22);
+            color: #fff; padding: 6px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+        }
+        .header.bsa-header .bsa-keluar:active { background: rgba(255,255,255,0.28); }
+        .bsa-nama .bsa-cabang { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+        .header.bsa-header { gap: 12px; padding-right: 12px; }
+        .header.bsa-header .bsa-logo { width: 54px; height: 54px; }
+        .header.bsa-header .bsa-nama .bsa-cv { font-size: 17px; }
+        .header.bsa-header .bsa-keluar { padding: 5px 9px; font-size: 12px; }
+        button[style*="color:#166534"] { color: var(--primary) !important; }
+        .bsa-op-tag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--sun); color: #1A1200; font-size: 11px; font-weight: 800; vertical-align: 1px; }
+
+        /* Layar menyimpan: logo berdenyut menggantikan spinner */
+        #loading_overlay { background: rgba(7, 26, 49, 0.93) !important; }
+        #loading_overlay .bsa-loading { margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
     <!-- OVERLAY PENUH LAYAR SAAT MENYIMPAN KE SERVER -->
     <div id="loading_overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center;">
-        <div style="width: 48px; height: 48px; border: 5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: putarLoading 0.8s linear infinite;"></div>
+        <div class="bsa-loading" data-logo="loading"></div>
         <p style="color: white; font-size: 15px; font-weight: 600; margin-top: 16px;">Menyimpan ke server...</p>
         <p style="color: rgba(255,255,255,0.75); font-size: 12px; margin-top: 4px;">Mohon tunggu, jangan tekan tombol apapun</p>
     </div>
@@ -387,6 +628,7 @@
     <!-- ============ HALAMAN PILIH MODUL (paling pertama muncul) ============ -->
     <div id="pilih_modul_overlay" class="login-overlay">
         <div class="login-card">
+            <div class="bsa-brand"><div class="bsa-badge" data-logo></div><div class="bsa-cv">CV. BUANA SINAR ABADI</div></div>
             <h2>Pilih Modul</h2>
             <p>Mau masuk ke bagian mana?</p>
 
@@ -409,8 +651,9 @@
     </div>
 
     <div id="login_modal" class="login-overlay" style="display: none;">
-        <div class="login-card">
+        <div class="login-card kecil">
             <button type="button" onclick="kembaliKePilihModul()" style="background: none; border: none; color: var(--primary); font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">← Kembali</button>
+            <div class="bsa-brand"><div class="bsa-badge" data-logo></div><div class="bsa-cv">CV. BUANA SINAR ABADI</div></div>
 
             <h2>Masuk Sistem Gudang</h2>
             <p>Pilih cabang dan masukkan password untuk mengakses aplikasi</p>
@@ -456,8 +699,9 @@
 
     <!-- ============ LOGIN OPERASIONAL (rangka tampilan, belum ada logika/backend) ============ -->
     <div id="login_operasional_overlay" class="login-overlay" style="display: none;">
-        <div class="login-card">
+        <div class="login-card kecil">
             <button type="button" onclick="kembaliKePilihModul()" style="background: none; border: none; color: #16a34a; font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">← Kembali</button>
+            <div class="bsa-brand"><div class="bsa-badge" data-logo></div><div class="bsa-cv">CV. BUANA SINAR ABADI</div></div>
 
             <h2 style="color: #16a34a;">Masuk Operasional</h2>
             <p>Login pakai username &amp; password kamu sendiri</p>
@@ -501,8 +745,9 @@
 
     <!-- ============ DAFTAR AKUN OPERASIONAL (bikin akun sendiri) ============ -->
     <div id="daftar_operasional_overlay" class="login-overlay" style="display: none;">
-        <div class="login-card">
+        <div class="login-card kecil">
             <button type="button" onclick="tampilkanLoginOperasional()" style="background: none; border: none; color: #16a34a; font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">← Kembali ke Login</button>
+            <div class="bsa-brand"><div class="bsa-badge" data-logo></div><div class="bsa-cv">CV. BUANA SINAR ABADI</div></div>
 
             <h2 style="color: #16a34a;">Daftar Akun Operasional</h2>
             <p>Bikin username &amp; password sendiri. Password ini cuma kamu yang tau.</p>
@@ -554,10 +799,14 @@
 
     <!-- ============ DASHBOARD OPERASIONAL: PENGIRIMAN KE PELANGGAN/TOKO ============ -->
     <div id="dashboard_operasional" class="app-container" style="display: none;">
-        <div class="header no-print" style="position: relative; background: #16a34a;">
-            <button onclick="logoutOperasional()" style="position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer;">← Keluar</button>
-            <h2>Operasional / Kurir</h2>
-            <p style="font-size: 12px; opacity: 0.9;" id="label_user_operasional">Login sebagai: -</p>
+        <div class="header bsa-header no-print" style="position: relative;">
+            <div class="bsa-logo" data-logo role="img" aria-label="Logo CV. Buana Sinar Abadi"></div>
+            <div class="bsa-nama">
+                <div class="bsa-cv">CV. Buana Sinar Abadi</div>
+                <div class="bsa-fungsi">Operasional / Kurir</div>
+                <div class="bsa-cabang" id="label_user_operasional">Login sebagai: -</div>
+            </div>
+            <button class="bsa-keluar" onclick="logoutOperasional()">← Keluar</button>
         </div>
 
         <div class="menu-tab no-print">
@@ -756,10 +1005,14 @@
     <!-- UTAMA APLIKASI -->
     <div id="app_container" class="app-container">
         
-        <div class="header no-print" style="position: relative;">
-            <button onclick="logout()" style="position: absolute; left: 12px; top: 12px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer;">← Keluar</button>
-            <h2>Input Barang Datang</h2>
-            <p style="font-size: 12px; opacity: 0.9;" id="label_kota_aktif">Cabang: -</p>
+        <div class="header bsa-header no-print" style="position: relative;">
+            <div class="bsa-logo" data-logo role="img" aria-label="Logo CV. Buana Sinar Abadi"></div>
+            <div class="bsa-nama">
+                <div class="bsa-cv">CV. Buana Sinar Abadi</div>
+                <div class="bsa-fungsi">Input barang datang</div>
+                <div class="bsa-cabang" id="label_kota_aktif">Cabang: -</div>
+            </div>
+            <button class="bsa-keluar" onclick="logout()">← Keluar</button>
         </div>
 
         <div id="peringatan_auto_login" class="no-print" style="display: none; background: #fef3c7; color: #92400e; padding: 10px 16px; font-size: 13px; text-align: center; border-bottom: 1px solid #fde68a;">
@@ -829,11 +1082,12 @@
                 </div>
             </div>
 
-            <button class="btn btn-primary" onclick="tambahBarang()">+ Tambahkan ke Daftar</button>
+            <button class="btn btn-tambah" onclick="tambahBarang()">+ Tambahkan ke Daftar</button>
         </div>
 
         <!-- Print Header -->
         <div class="print-header">
+            <h2 style="letter-spacing: 0.02em;">CV. BUANA SINAR ABADI</h2>
             <h2>LAPORAN BARANG DATANG</h2>
             <p id="print-date"></p>
             <p id="print-kolian" style="font-weight: bold;"></p>
@@ -3205,7 +3459,35 @@
             }
         }
 
+        // ===================== LOGO CV. BUANA SINAR ABADI =====================
+        // Logo bawaan: matahari terbit di atas kotak barang (nama "Buana Sinar Abadi").
+        // Mau pakai logo asli perusahaan? Isi LOGO_URL dengan alamat gambar atau data-URI
+        // (contoh: "data:image/png;base64,...."), logo bawaan otomatis diganti.
+        const LOGO_URL = "";
+
+        function svgLogoBSA() {
+            return '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+                + '<g class="bsa-rays" stroke="#FFD166" stroke-width="2.6" stroke-linecap="round"><line x1="16.0" y1="40.0" x2="9.0" y2="40.0"/><line x1="17.2" y1="33.9" x2="10.8" y2="31.2"/><line x1="20.7" y1="28.7" x2="15.7" y2="23.7"/><line x1="25.9" y1="25.2" x2="23.2" y2="18.8"/><line x1="32.0" y1="24.0" x2="32.0" y2="17.0"/><line x1="38.1" y1="25.2" x2="40.8" y2="18.8"/><line x1="43.3" y1="28.7" x2="48.3" y2="23.7"/><line x1="46.8" y1="33.9" x2="53.2" y2="31.2"/><line x1="48.0" y1="40.0" x2="55.0" y2="40.0"/></g>'
+                + '<path class="bsa-sun" d="M21 40 A11 11 0 0 1 43 40 Z" fill="#F4A300"/>'
+                + '<line x1="6" y1="40" x2="58" y2="40" stroke="#F4A300" stroke-width="2.4" stroke-linecap="round"/>'
+                + '<g class="bsa-box"><rect x="19" y="45" width="26" height="15" rx="2.5" fill="#FFFFFF"/>'
+                + '<rect x="29.5" y="45" width="5" height="15" fill="#F4A300"/></g>'
+                + '</svg>';
+        }
+
+        function pasangLogoBSA() {
+            const isi = LOGO_URL
+                ? '<img src="' + LOGO_URL.replace(/"/g, '&quot;') + '" alt="Logo CV. Buana Sinar Abadi">'
+                : svgLogoBSA();
+            document.querySelectorAll('[data-logo]').forEach(function(el) {
+                // logo di layar menyimpan selalu versi bawaan bila LOGO_URL kosong
+                el.innerHTML = isi;
+            });
+        }
+
+        
         window.onload = function() {
+            pasangLogoBSA();
             gudangSetTanggalHariIni();
             // Setiap rekap digambar ulang (Muat/Refresh, pindah mode), terapkan lagi pencariannya
             new MutationObserver(terapkanCariRekap).observe(document.getElementById('rekap_body'), { childList: true });
